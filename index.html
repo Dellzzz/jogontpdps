@@ -10,6 +10,7 @@
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
+            user-select: none;
         }
         
         body { 
@@ -218,7 +219,7 @@
             transition: 0.2s;
         }
         
-        /* ========== BOTÕES MOBILE RESPONSIVOS ========== */
+        /* ========== BOTÕES MOBILE ========== */
         .mobile-controls {
             position: fixed;
             bottom: 0;
@@ -242,9 +243,11 @@
             text-align: center;
             cursor: pointer;
             touch-action: manipulation;
-            user-select: none;
             transition: 0.05s linear;
             backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .mobile-btn:active {
@@ -269,9 +272,6 @@
                 height: 70px;
                 border-radius: 20px;
                 font-size: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
                 background: rgba(30, 41, 59, 0.9);
             }
             .mobile-btn.jump {
@@ -291,37 +291,64 @@
             }
         }
         
-        /* Modo PAISAGEM (largura > altura) - Botões sobrepostos com baixa opacidade */
+        /* Modo PAISAGEM (largura > altura) - Círculos à esquerda, baixa opacidade */
         @media (orientation: landscape) {
             .mobile-controls {
-                bottom: 50%;
-                transform: translateY(50%);
-                right: 10px;
-                left: auto;
+                position: fixed;
+                bottom: auto;
+                top: 50%;
+                transform: translateY(-50%);
+                left: 15px;
+                right: auto;
                 flex-direction: column;
-                gap: 12px;
-                padding: 10px;
+                gap: 15px;
+                padding: 0;
                 background: transparent;
-            }
-            .mobile-btn {
-                width: 60px;
-                height: 60px;
-                border-radius: 30px;
-                font-size: 28px;
                 display: flex;
-                align-items: center;
-                justify-content: center;
-                background: rgba(30, 41, 59, 0.5);
-                border-width: 1.5px;
+            }
+            
+            /* Botão esquerda */
+            .mobile-btn.left {
+                width: 55px;
+                height: 55px;
+                border-radius: 50%;
+                font-size: 32px;
+                background: rgba(30, 41, 59, 0.35);
+                border: 2px solid rgba(99, 102, 241, 0.5);
                 backdrop-filter: blur(4px);
             }
+            
+            /* Botão direita */
+            .mobile-btn.right {
+                width: 55px;
+                height: 55px;
+                border-radius: 50%;
+                font-size: 32px;
+                background: rgba(30, 41, 59, 0.35);
+                border: 2px solid rgba(99, 102, 241, 0.5);
+                backdrop-filter: blur(4px);
+            }
+            
+            /* Botão pular (círculo com O) */
             .mobile-btn.jump {
-                background: rgba(99, 102, 241, 0.5);
+                width: 55px;
+                height: 55px;
+                border-radius: 50%;
+                font-size: 28px;
+                background: rgba(99, 102, 241, 0.35);
+                border: 2px solid rgba(251, 191, 36, 0.5);
+                backdrop-filter: blur(4px);
             }
+            
             .mobile-btn:active {
-                background: rgba(99, 102, 241, 0.9);
-                transform: scale(0.95);
+                background: rgba(99, 102, 241, 0.7);
+                transform: scale(0.92);
             }
+            
+            .mobile-btn.left:active, .mobile-btn.right:active {
+                background: rgba(99, 102, 241, 0.7);
+            }
+            
             .hud-box {
                 font-size: 12px;
                 padding: 5px 12px;
@@ -346,7 +373,7 @@
             }
         }
         
-        /* Ajuste para telas muito pequenas */
+        /* Ajuste para telas muito pequenas no retrato */
         @media (max-width: 480px) and (orientation: portrait) {
             .mobile-btn {
                 width: 60px;
@@ -356,6 +383,18 @@
             .hud-box {
                 font-size: 10px;
                 padding: 3px 8px;
+            }
+        }
+        
+        /* Ajuste para telas pequenas no paisagem */
+        @media (max-height: 400px) and (orientation: landscape) {
+            .mobile-btn.left, .mobile-btn.right, .mobile-btn.jump {
+                width: 45px;
+                height: 45px;
+                font-size: 26px;
+            }
+            .mobile-controls {
+                gap: 10px;
             }
         }
     </style>
@@ -390,9 +429,9 @@
     </div>
     
     <div class="mobile-controls">
-        <div class="mobile-btn left" id="btn-left">◀</div>
-        <div class="mobile-btn right" id="btn-right">▶</div>
-        <div class="mobile-btn jump" id="btn-jump">▲</div>
+        <div class="mobile-btn left" id="btn-left">&lt;</div>
+        <div class="mobile-btn right" id="btn-right">&gt;</div>
+        <div class="mobile-btn jump" id="btn-jump">O</div>
     </div>
 
 <script>
@@ -402,7 +441,6 @@
     const ctx = canvas.getContext('2d');
     
     function resizeGame() {
-        const wrapper = document.querySelector('.game-wrapper');
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
         
@@ -454,14 +492,14 @@
     const btnRight = document.getElementById('btn-right');
     const btnJump = document.getElementById('btn-jump');
 
-    // ========== FÍSICA ==========
+    // ========== FÍSICA - VELOCIDADE AUMENTADA 1.5x ==========
     const physics = { 
-        grav: 0.13,
-        speed: 1.6,
-        jump: -12.0,
-        maxJumpHold: -6.5,
-        acceleration: 0.28,
-        friction: 0.87
+        grav: 0.195,        // 0.13 * 1.5
+        speed: 2.4,         // 1.6 * 1.5
+        jump: -18.0,        // -12.0 * 1.5
+        maxJumpHold: -9.75, // -6.5 * 1.5
+        acceleration: 0.42, // 0.28 * 1.5
+        friction: 0.8       // ajustado para manter controle
     };
     
     const player = { 
@@ -897,7 +935,7 @@
 
     function update() {
         if(!isQuizActive && !respawning && lives > 0) {
-            time += 0.04;
+            time += 0.06; // tempo ajustado para manter animações proporcionais
             
             let targetVx = 0;
             let isLeft = (keys['ArrowLeft'] || keys['KeyA'] || mobileLeft);
@@ -917,7 +955,7 @@
                 player.vy = physics.jump;
                 player.grounded = false;
                 player.jumpHeld = true;
-                player.jumpTimer = 8;
+                player.jumpTimer = 12;
                 spawnParticles(player.x + 16, player.y + player.h, '#e2e8f0', 6);
             }
             
@@ -991,7 +1029,7 @@
                 let p = particles[i];
                 p.x += p.vx;
                 p.y += p.vy;
-                p.vy += 0.08;
+                p.vy += 0.12;
                 p.life -= p.decay;
                 if(p.life <= 0) particles.splice(i, 1);
             }
@@ -1005,7 +1043,7 @@
                 let targetX = player.x - canvas.width / 2;
                 if(targetX < 0) targetX = 0;
                 if(targetX > level.w - canvas.width) targetX = level.w - canvas.width;
-                camera.x += (targetX - camera.x) * 0.12;
+                camera.x += (targetX - camera.x) * 0.18;
             } else {
                 camera.x = 0;
             }
@@ -1149,7 +1187,7 @@
         // Moedas
         level.coins.forEach(c => {
             if(!c.collected && !respawning) {
-                let hover = Math.sin(time * 3.5 + c.x) * 4;
+                let hover = Math.sin(time * 5 * 1.5 + c.x) * 4;
                 if(c.locked) {
                     ctx.fillStyle = '#9ca3af';
                     ctx.beginPath();
@@ -1187,7 +1225,7 @@
         ctx.globalAlpha = 1.0;
 
         // Personagem
-        let bounce = player.grounded ? Math.sin(time * 6) * 1.5 : 0;
+        let bounce = player.grounded ? Math.sin(time * 9) * 1.5 : 0;
         ctx.fillStyle = '#ef4444';
         roundRect(player.x, player.y + bounce, player.w, player.h, 8);
         
