@@ -9,80 +9,92 @@
         * {
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
         
         body { 
-            margin: 0; padding: 0; 
-            background-color: #0f172a; 
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center; 
-            min-height: 100vh; font-family: 'Poppins', sans-serif; 
-            color: #f8fafc; 
+            margin: 0;
+            padding: 0;
+            background-color: #0f172a;
+            font-family: 'Poppins', sans-serif;
             overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
         
-        #game-container {
-            position: relative;
-            width: 1280px;
-            max-width: 100%;
-            height: auto;
+        /* Container do jogo - tela cheia */
+        .game-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         
         #game-viewport { 
-            width: 1280px; 
-            height: 720px; 
-            max-width: 100%;
-            max-height: 70vh;
-            background: #87CEEB; 
-            border: 6px solid #1e293b; 
-            border-radius: 16px; 
-            position: relative; 
-            overflow: hidden; 
-            box-shadow: 0 15px 50px rgba(0,0,0,0.6);
+            position: relative;
+            background: #87CEEB;
+            border: 3px solid #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
         
         canvas {
+            display: block;
             width: 100%;
             height: 100%;
             object-fit: contain;
         }
 
         #hud-container {
-            position: absolute; top: 20px; left: 20px; right: 20px;
-            display: flex; justify-content: space-between;
-            pointer-events: none; z-index: 10;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 10;
+            gap: 8px;
             flex-wrap: wrap;
-            gap: 10px;
         }
         
         .hud-box {
-            background: rgba(15, 23, 42, 0.7);
+            background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(8px);
-            padding: 8px 20px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.15);
+            padding: 6px 14px;
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.2);
             color: white;
             font-weight: 600;
-            font-size: 18px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             transition: 0.3s ease;
+            white-space: nowrap;
         }
         
         .hud-warning {
-            background: rgba(239, 68, 68, 0.8);
+            background: rgba(239, 68, 68, 0.85);
             animation: pulse-warning 0.8s infinite;
         }
         
         @keyframes pulse-warning {
             0%, 100% { opacity: 0.7; }
-            50% { opacity: 1; transform: scale(1.05); }
+            50% { opacity: 1; transform: scale(1.02); }
         }
         
         .portal-ready {
-            background: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.35);
             border-color: #34d399;
             color: #34d399;
             animation: pulse-hud 1.5s infinite;
@@ -90,7 +102,7 @@
 
         @keyframes pulse-hud {
             0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
-            70% { box-shadow: 0 0 0 12px rgba(52, 211, 153, 0); }
+            70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
             100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
         }
 
@@ -102,38 +114,38 @@
         }
 
         #question-text {
-            color: #fff; margin-bottom: 30px; font-size: 32px; padding: 0 40px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            max-width: 80%;
+            color: #fff; margin-bottom: 20px; font-size: 24px; padding: 0 20px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            max-width: 90%;
         }
 
         .option-btn { 
             background: linear-gradient(145deg, #1e293b, #0f172a);
             border: 2px solid #6366f1;
             color: #fff;
-            padding: 14px 28px;
-            margin: 10px;
+            padding: 12px 24px;
+            margin: 8px;
             cursor: pointer;
             border-radius: 12px;
-            font-size: 20px;
+            font-size: 16px;
             font-family: 'Poppins';
-            width: 100%;
-            max-width: 650px;
+            width: 90%;
+            max-width: 500px;
             transition: all 0.2s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         
-        .option-btn:hover { background: #6366f1; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(99, 102, 241, 0.4); }
+        .option-btn:active { background: #6366f1; transform: scale(0.98); }
 
         #toast { 
-            position: absolute; top: 80px; left: 50%; transform: translateX(-50%); 
-            padding: 10px 30px;
-            border-radius: 50px;
+            position: absolute; top: 70px; left: 50%; transform: translateX(-50%); 
+            padding: 8px 20px;
+            border-radius: 40px;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 14px;
             display: none;
             z-index: 101;
             color: white;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
             white-space: nowrap;
             text-align: center;
             font-family: 'Poppins', sans-serif;
@@ -141,26 +153,33 @@
         }
 
         .instructions {
-            margin-top: 12px;
-            font-size: 16px;
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
             color: #94a3b8;
+            background: rgba(0,0,0,0.5);
+            padding: 4px;
+            z-index: 5;
         }
         .instructions span {
             color: #6366f1;
             font-weight: bold;
             background: #1e293b;
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
         
         #key-status {
             position: absolute;
-            bottom: 15px;
-            right: 15px;
+            bottom: 10px;
+            right: 10px;
             background: rgba(0,0,0,0.6);
-            padding: 6px 14px;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: bold;
             pointer-events: none;
             z-index: 10;
@@ -182,7 +201,7 @@
         }
         
         #game-over-panel h2 {
-            font-size: 48px;
+            font-size: 36px;
             color: #ef4444;
             margin-bottom: 20px;
         }
@@ -191,40 +210,32 @@
             background: #6366f1;
             border: none;
             color: white;
-            padding: 12px 30px;
-            font-size: 20px;
+            padding: 10px 25px;
+            font-size: 18px;
             border-radius: 30px;
             cursor: pointer;
             font-family: 'Poppins';
             transition: 0.2s;
         }
         
-        #game-over-panel button:hover {
-            background: #8183f5;
-            transform: scale(1.05);
-        }
-        
-        /* Botões Mobile */
+        /* ========== BOTÕES MOBILE RESPONSIVOS ========== */
         .mobile-controls {
             position: fixed;
-            bottom: 20px;
+            bottom: 0;
             left: 0;
             right: 0;
             display: flex;
             justify-content: center;
-            gap: 20px;
-            padding: 10px;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
+            gap: 15px;
+            padding: 12px;
             z-index: 150;
-            display: none;
+            transition: all 0.2s ease;
         }
         
         .mobile-btn {
-            background: rgba(30, 41, 59, 0.9);
+            background: rgba(30, 41, 59, 0.85);
             border: 2px solid #6366f1;
-            border-radius: 60px;
-            padding: 15px 30px;
+            border-radius: 20px;
             font-size: 28px;
             font-weight: bold;
             color: white;
@@ -232,50 +243,130 @@
             cursor: pointer;
             touch-action: manipulation;
             user-select: none;
-            min-width: 100px;
-            transition: 0.1s;
+            transition: 0.05s linear;
+            backdrop-filter: blur(8px);
         }
         
         .mobile-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
             background: #6366f1;
         }
         
-        .mobile-btn.left {
-            background: rgba(30, 41, 59, 0.9);
-        }
-        
-        .mobile-btn.right {
-            background: rgba(30, 41, 59, 0.9);
-        }
-        
         .mobile-btn.jump {
-            background: rgba(99, 102, 241, 0.9);
+            background: rgba(99, 102, 241, 0.85);
             border-color: #fbbf24;
         }
         
-        @media (max-width: 1024px) {
+        /* Modo RETRATO (altura > largura) - Botões quadrados pequenos */
+        @media (orientation: portrait) {
             .mobile-controls {
+                bottom: 10px;
+                gap: 12px;
+                padding: 8px;
+            }
+            .mobile-btn {
+                width: 70px;
+                height: 70px;
+                border-radius: 20px;
+                font-size: 32px;
                 display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(30, 41, 59, 0.9);
+            }
+            .mobile-btn.jump {
+                background: rgba(99, 102, 241, 0.9);
+            }
+            .hud-box {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
+            #toast {
+                top: 60px;
+                font-size: 12px;
+                white-space: nowrap;
             }
             .instructions {
                 display: none;
             }
+        }
+        
+        /* Modo PAISAGEM (largura > altura) - Botões sobrepostos com baixa opacidade */
+        @media (orientation: landscape) {
+            .mobile-controls {
+                bottom: 50%;
+                transform: translateY(50%);
+                right: 10px;
+                left: auto;
+                flex-direction: column;
+                gap: 12px;
+                padding: 10px;
+                background: transparent;
+            }
+            .mobile-btn {
+                width: 60px;
+                height: 60px;
+                border-radius: 30px;
+                font-size: 28px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(30, 41, 59, 0.5);
+                border-width: 1.5px;
+                backdrop-filter: blur(4px);
+            }
+            .mobile-btn.jump {
+                background: rgba(99, 102, 241, 0.5);
+            }
+            .mobile-btn:active {
+                background: rgba(99, 102, 241, 0.9);
+                transform: scale(0.95);
+            }
             .hud-box {
+                font-size: 12px;
                 padding: 5px 12px;
-                font-size: 14px;
+            }
+            #toast {
+                top: 55px;
+                font-size: 13px;
+            }
+            .instructions {
+                font-size: 10px;
+                bottom: 5px;
+            }
+        }
+        
+        /* Desktop/tablet maior - sem botões touch visíveis */
+        @media (min-width: 1024px) and (min-height: 700px) {
+            .mobile-controls {
+                display: none;
+            }
+            .instructions {
+                display: block;
+            }
+        }
+        
+        /* Ajuste para telas muito pequenas */
+        @media (max-width: 480px) and (orientation: portrait) {
+            .mobile-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+            .hud-box {
+                font-size: 10px;
+                padding: 3px 8px;
             }
         }
     </style>
 </head>
 <body>
-
-    <div id="game-container">
+    <div class="game-wrapper">
         <div id="game-viewport">
             <div id="hud-container">
-                <div class="hud-box" id="hud-level">🗺️ Nível: 1</div>
-                <div class="hud-box" id="hud-coins">🪙 Moedas: 0/3</div>
-                <div class="hud-box" id="hud-lives">❤️ Vidas: 3</div>
+                <div class="hud-box" id="hud-level">🗺️ Nível 1</div>
+                <div class="hud-box" id="hud-coins">🪙 0/3</div>
+                <div class="hud-box" id="hud-lives">❤️ 3</div>
             </div>
             <div id="key-status"></div>
             <div id="toast"></div>
@@ -295,18 +386,58 @@
     </div>
 
     <div class="instructions">
-        Controles: <span>◀ ▶</span> ou <span>A / D</span> mover | <span>ESPAÇO</span> ou <span>▲</span> pular (segure para pular mais alto)
+        <span>◀ ▶</span> ou <span>A/D</span> mover | <span>▲</span> ou <span>ESPAÇO</span> pular
     </div>
     
     <div class="mobile-controls">
         <div class="mobile-btn left" id="btn-left">◀</div>
         <div class="mobile-btn right" id="btn-right">▶</div>
-        <div class="mobile-btn jump" id="btn-jump">PULAR</div>
+        <div class="mobile-btn jump" id="btn-jump">▲</div>
     </div>
 
 <script>
+    // Ajuste automático do canvas para tela cheia responsivo
+    const viewport = document.getElementById('game-viewport');
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    
+    function resizeGame() {
+        const wrapper = document.querySelector('.game-wrapper');
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        // Proporção do jogo: 1280x720 (16:9)
+        const gameRatio = 1280 / 720;
+        const windowRatio = windowWidth / windowHeight;
+        
+        let width, height;
+        
+        if (windowRatio > gameRatio) {
+            // Tela mais larga que o jogo
+            height = windowHeight;
+            width = height * gameRatio;
+        } else {
+            // Tela mais alta que o jogo
+            width = windowWidth;
+            height = width / gameRatio;
+        }
+        
+        viewport.style.width = width + 'px';
+        viewport.style.height = height + 'px';
+        
+        // Ajustar canvas interno
+        canvas.width = 1280;
+        canvas.height = 720;
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+    }
+    
+    window.addEventListener('resize', resizeGame);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(resizeGame, 50);
+    });
+    resizeGame();
+    
     const hudLevel = document.getElementById('hud-level');
     const hudCoins = document.getElementById('hud-coins');
     const hudLives = document.getElementById('hud-lives');
@@ -352,7 +483,7 @@
     let time = 0;
     let lives = 3;
     
-    // Checkpoint salva também as moedas coletadas
+    // Checkpoint
     let checkpoint = { x: null, y: null, active: false, level: -1, coinsCollected: 0, hasKey: false, collectedCoinsIndices: [] };
     let checkpointFlagPos = null;
     let respawning = false;
@@ -376,8 +507,6 @@
     ];
 
     // ========== FASES ==========
-    // hasPit = true = fase com buraco/risco (tem checkpoint)
-    // hasPit = false = fase segura (sem checkpoint)
     const levels = [
         { w: 2000, hasKey: false, totalCoins: 3, hasPit: true, checkpointPos: { x: 900, y: 550 },
           platforms: [{x:0,y:670,w:2000,h:50},{x:350,y:570,w:200,h:20},{x:650,y:480,w:200,h:20},{x:950,y:570,w:200,h:20},{x:1250,y:480,w:200,h:20},{x:1550,y:390,w:200,h:20}],
@@ -416,7 +545,7 @@
     let level;
     let keyCollected = false;
 
-    // ========== CONTROLES MOBILE ==========
+    // Controles mobile
     let mobileLeft = false;
     let mobileRight = false;
     let mobileJump = false;
@@ -444,7 +573,6 @@
     });
     btnJump.addEventListener('mouseup', () => { mobileJump = false; });
     
-    // Prevenir scroll na tela ao tocar nos botões
     document.querySelectorAll('.mobile-btn').forEach(btn => {
         btn.addEventListener('touchmove', (e) => e.preventDefault());
     });
@@ -510,7 +638,6 @@
         if(!level.hasPit) return;
         if(checkpoint.active && checkpoint.level === currentLevel) return;
         
-        // Salva o estado atual no checkpoint
         checkpoint = { 
             x: player.x, 
             y: player.y, 
@@ -521,7 +648,6 @@
             collectedCoinsIndices: level.coins.map((c, idx) => c.collected ? idx : -1).filter(i => i !== -1)
         };
         
-        // Marca a posição da bandeira
         if(level.checkpointPos) {
             checkpointFlagPos = { x: level.checkpointPos.x, y: level.checkpointPos.y };
         }
@@ -536,7 +662,6 @@
         keyCollected = checkpoint.hasKey;
         coinsCollected = checkpoint.coinsCollected;
         
-        // Restaura moedas coletadas
         level.coins.forEach((c, idx) => {
             c.collected = checkpoint.collectedCoinsIndices.includes(idx);
         });
@@ -575,7 +700,7 @@
         if(lives === 1) {
             showTopMessage("⚠️ ÚLTIMA VIDA! CUIDADO! ⚠️", true);
         } else {
-            showTopMessage(`💔 Vida perdida! Restam ${lives} vidas`, true);
+            showTopMessage(`💔 Vida perdida! Restam ${lives}`, true);
         }
         
         if(lives <= 0) {
@@ -588,14 +713,12 @@
     }
 
     function tryActivateCheckpoint() {
-        // Só ativa checkpoint se a fase TEM risco (hasPit = true) e ainda não foi ativado
         if(!level.hasPit) return;
         if(checkpoint.active && checkpoint.level === currentLevel) return;
         
         let cp = level.checkpointPos;
         if(!cp) return;
         
-        // Verifica se o jogador está em cima da posição do checkpoint
         let checkpointPlatformX = cp.x;
         let checkpointPlatformY = cp.y - 25;
         
@@ -603,7 +726,7 @@
            player.y + player.h > checkpointPlatformY && player.y < checkpointPlatformY + 30) {
             
             saveToCheckpoint();
-            showTopMessage("🏁 CHECKPOINT ATIVADO! (moedas salvas) 🏁", false);
+            showTopMessage("🏁 CHECKPOINT ATIVADO! 🏁", false);
             spawnParticles(cp.x + 20, cp.y - 20, '#ef4444', 25);
             updateHUD();
         }
@@ -623,7 +746,6 @@
         camera.x = 0;
         particles = [];
         
-        // Reset checkpoint apenas para fases com risco
         if(level.hasPit) {
             checkpoint = { x: null, y: null, active: false, level: -1, coinsCollected: 0, hasKey: false, collectedCoinsIndices: [] };
             checkpointFlagPos = null;
@@ -632,8 +754,8 @@
             checkpointFlagPos = null;
         }
         
-        hudLevel.innerText = `🗺️ Nível: ${currentLevel + 1}`;
-        hudLives.innerText = `❤️ Vidas: ${lives}`;
+        hudLevel.innerText = `🗺️ ${currentLevel + 1}`;
+        hudLives.innerText = `❤️ ${lives}`;
         
         generateEnvironment(level.w);
         
@@ -653,14 +775,12 @@
     function updateHUD() {
         let maxCoins = totalCoinsInLevel;
         let remainingCoins = level.coins.filter(c => !c.collected).length;
-        let displayCoinText = `🪙 Moedas: ${coinsCollected}/${maxCoins}`;
+        let displayCoinText = `🪙 ${coinsCollected}/${maxCoins}`;
         
         if(remainingCoins === 0 && coinsCollected === maxCoins) {
-            displayCoinText = `✨ TODAS AS MOEDAS! ✨`;
+            displayCoinText = `✨ COMPLETO! ✨`;
             hudCoins.classList.add('portal-ready');
-            showTopMessage("🌟 TODAS AS MOEDAS COLETADAS! PROCURE O PORTAL! 🌟", false);
-        } else if(remainingCoins > 0 && coinsCollected === maxCoins - 1 && maxCoins > 3) {
-            displayCoinText = `🪙 Moedas: ${coinsCollected}/${maxCoins} (FALTA 1!)`;
+            showTopMessage("🌟 TODAS AS MOEDAS! VÁ AO PORTAL! 🌟", false);
         } else {
             hudCoins.classList.remove('portal-ready');
         }
@@ -677,10 +797,10 @@
         else hudLives.classList.remove('hud-warning');
         
         if(level.hasKey && player.hasKey) {
-            keyStatus.innerText = "🔑 Possui Chave!";
+            keyStatus.innerText = "🔑 Chave";
             keyStatus.style.background = "rgba(234,179,8,0.8)";
         } else if(level.hasKey && level.keyPos && !keyCollected) {
-            keyStatus.innerText = "🔒 Chave no mapa!";
+            keyStatus.innerText = "🔒 Chave";
             keyStatus.style.background = "rgba(100,100,100,0.7)";
         } else {
             keyStatus.innerText = "";
@@ -689,9 +809,9 @@
 
     function showQuizResult(correct) {
         if(correct) {
-            showTopMessage("✅ RESPOSTA CORRETA! ✅", false);
+            showTopMessage("✅ CORRETO! ✅", false);
         } else {
-            showTopMessage("❌ RESPOSTA ERRADA! TENTE NOVAMENTE! ❌", true);
+            showTopMessage("❌ ERRADO! TENTE NOVAMENTE! ❌", true);
         }
     }
 
@@ -726,7 +846,7 @@
     function showEndScreen() {
         isQuizActive = true;
         ui.style.display = 'flex';
-        questionEl.innerText = "🏆 PARABÉNS!\nVocê finalizou a Odisséia Educativa!";
+        questionEl.innerText = "🏆 PARABÉNS!\nVocê finalizou a Odisséia!";
         optionsEl.innerHTML = '';
         const btn = document.createElement('div');
         btn.className = 'option-btn';
@@ -740,7 +860,7 @@
         optionsEl.appendChild(btn);
     }
 
-    // ========== COLISÃO ==========
+    // Colisão
     function applyCollision() {
         player.grounded = false;
         
@@ -779,7 +899,6 @@
         if(!isQuizActive && !respawning && lives > 0) {
             time += 0.04;
             
-            // Controles combinados (teclado + mobile)
             let targetVx = 0;
             let isLeft = (keys['ArrowLeft'] || keys['KeyA'] || mobileLeft);
             let isRight = (keys['ArrowRight'] || keys['KeyD'] || mobileRight);
@@ -793,10 +912,6 @@
             }
             
             let jumpPressed = (keys['Space'] || keys['ArrowUp'] || keys['KeyW'] || mobileJump);
-            let jumpJustPressed = (keys['Space'] && !keys['SpacePrev']) || (keys['ArrowUp'] && !keys['ArrowUpPrev']) || mobileJumpJustPressed;
-            
-            keys['SpacePrev'] = keys['Space'];
-            keys['ArrowUpPrev'] = keys['ArrowUp'];
             
             if(jumpPressed && player.grounded) {
                 player.vy = physics.jump;
@@ -818,10 +933,7 @@
             player.vy += physics.grav;
             applyCollision();
             
-            // Ativar checkpoint (apenas em fases com risco)
-            if(level.hasPit) {
-                tryActivateCheckpoint();
-            }
+            if(level.hasPit) tryActivateCheckpoint();
             
             // Chave
             if(level.hasKey && level.keyPos && !keyCollected && !player.hasKey && !respawning) {
@@ -831,9 +943,8 @@
                     keyCollected = true;
                     player.hasKey = true;
                     spawnParticles(keyX + 12, keyY + 12, '#facc15', 30);
-                    showTopMessage("🔑 CHAVE OBTIDA! AGORA PEGUE A MOEDA TRANCADA! 🔑", false);
+                    showTopMessage("🔑 CHAVE OBTIDA! 🔑", false);
                     updateHUD();
-                    // Se checkpoint já existe, atualiza estado da chave
                     if(checkpoint.active && checkpoint.level === currentLevel) {
                         checkpoint.hasKey = true;
                     }
@@ -846,7 +957,7 @@
                    player.x < c.x + 22 && player.x + player.w > c.x &&
                    player.y < c.y + 22 && player.y + player.h > c.y) {
                     if(c.locked && (!player.hasKey || !level.hasKey)) {
-                        showTopMessage("🔒 MOEDA TRANCADA! ENCONTRE A CHAVE PRIMEIRO! 🔒", true);
+                        showTopMessage("🔒 MOEDA TRANCADA!", true);
                         return;
                     }
                     c.collected = true;
@@ -854,9 +965,8 @@
                     spawnParticles(c.x + 12, c.y + 12, '#fbbf24', 15);
                     updateHUD();
                     if(coinsCollected === totalCoinsInLevel) {
-                        showTopMessage("🌟 TODAS AS MOEDAS COLETADAS! VÁ PARA O PORTAL! 🌟", false);
+                        showTopMessage("🌟 TODAS AS MOEDAS! VÁ AO PORTAL! 🌟", false);
                     }
-                    // Se checkpoint existe, atualiza estado das moedas
                     if(checkpoint.active && checkpoint.level === currentLevel) {
                         checkpoint.coinsCollected = coinsCollected;
                         checkpoint.collectedCoinsIndices = level.coins.map((c2, i2) => c2.collected ? i2 : -1).filter(i2 => i2 !== -1);
@@ -877,7 +987,6 @@
                 }
             }
             
-            // Partículas
             for(let i=particles.length-1; i>=0; i--) {
                 let p = particles[i];
                 p.x += p.vx;
@@ -961,7 +1070,7 @@
             roundRect(p.x, p.y, p.w, 14, 6);
         });
 
-        // BANDEIRA VERMELHA DO CHECKPOINT (apenas em fases com risco e não ativado)
+        // Bandeira checkpoint
         if(level.hasPit && level.checkpointPos && !checkpoint.active) {
             let flagX = level.checkpointPos.x;
             let flagY = level.checkpointPos.y - 25;
@@ -969,39 +1078,28 @@
             
             ctx.fillStyle = '#78350f';
             ctx.fillRect(flagX + 18, flagY - 35, 4, 60);
-            
             ctx.fillStyle = '#ef4444';
             ctx.beginPath();
             ctx.moveTo(flagX + 22, flagY - 35);
             ctx.lineTo(flagX + 52 + flagWave, flagY - 28);
             ctx.lineTo(flagX + 22, flagY - 21);
             ctx.fill();
-            
             ctx.fillStyle = '#fef08a';
             ctx.font = "bold 20px Poppins";
             ctx.fillText("🏁", flagX + 8, flagY - 38);
-            
-            ctx.globalAlpha = 0.3;
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(flagX, flagY - 10, 40, 20);
-            ctx.globalAlpha = 1;
         }
         
-        // Bandeira já ativada (checkpoint salvo)
         if(level.hasPit && checkpoint.active && checkpoint.level === currentLevel && checkpointFlagPos) {
             let flagX = checkpointFlagPos.x;
             let flagY = checkpointFlagPos.y - 25;
-            
             ctx.fillStyle = '#78350f';
             ctx.fillRect(flagX + 18, flagY - 35, 4, 60);
-            
             ctx.fillStyle = '#22c55e';
             ctx.beginPath();
             ctx.moveTo(flagX + 22, flagY - 35);
             ctx.lineTo(flagX + 52, flagY - 28);
             ctx.lineTo(flagX + 22, flagY - 21);
             ctx.fill();
-            
             ctx.fillStyle = '#fef08a';
             ctx.font = "bold 20px Poppins";
             ctx.fillText("✓", flagX + 28, flagY - 32);
@@ -1122,7 +1220,13 @@
 
     startLevel(0);
     loop();
+    
+    // Reajustar ao mudar orientação
+    window.addEventListener('resize', () => {
+        setTimeout(() => {
+            resizeGame();
+        }, 50);
+    });
 </script>
-
 </body>
 </html>
