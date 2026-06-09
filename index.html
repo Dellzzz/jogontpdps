@@ -260,22 +260,24 @@
             border-color: #fbbf24;
         }
         
-        /* Modo RETRATO (altura > largura) - Botões quadrados pequenos */
+        /* Modo RETRATO (altura > largura) - Botões quadrados maiores */
         @media (orientation: portrait) {
             .mobile-controls {
-                bottom: 10px;
-                gap: 12px;
-                padding: 8px;
+                bottom: 20px;
+                gap: 18px;
+                padding: 12px;
             }
             .mobile-btn {
-                width: 70px;
-                height: 70px;
-                border-radius: 20px;
-                font-size: 32px;
+                width: 105px;
+                height: 105px;
+                border-radius: 30px;
+                font-size: 48px;
                 background: rgba(30, 41, 59, 0.9);
             }
             .mobile-btn.jump {
                 background: rgba(99, 102, 241, 0.9);
+                width: 120px;
+                height: 105px;
             }
             .hud-box {
                 font-size: 11px;
@@ -291,7 +293,7 @@
             }
         }
         
-        /* Modo PAISAGEM (largura > altura) - Posicionamento específico */
+        /* Modo PAISAGEM (largura > altura) - Posicionamento específico com bordas dobradas e botões 50% maiores */
         @media (orientation: landscape) {
             .mobile-controls {
                 position: fixed;
@@ -313,39 +315,39 @@
             /* Container para botões de movimento (esquerda/direita) */
             .movement-buttons {
                 position: absolute;
-                bottom: 15px;
-                left: 15px;
+                bottom: 30px;
+                left: 30px;
                 display: flex;
                 flex-direction: row;
-                gap: 15px;
+                gap: 22px;
                 pointer-events: auto;
             }
             
             /* Botão pular isolado */
             .jump-button-container {
                 position: absolute;
-                bottom: 30px;
-                right: 30px;
+                bottom: 60px;
+                right: 60px;
                 pointer-events: auto;
             }
             
-            /* Estilo dos botões de movimento */
+            /* Botões de movimento - 50% maiores (70px -> 105px) */
             .mobile-btn.left, .mobile-btn.right {
-                width: 70px;
-                height: 70px;
+                width: 105px;
+                height: 105px;
                 border-radius: 50%;
-                font-size: 40px;
+                font-size: 60px;
                 background: rgba(30, 41, 59, 0.35);
                 border: 2px solid rgba(99, 102, 241, 0.5);
                 backdrop-filter: blur(4px);
             }
             
-            /* Botão pular (maior) */
+            /* Botão pular - 50% maior (85px -> 128px) */
             .mobile-btn.jump {
-                width: 85px;
-                height: 85px;
+                width: 128px;
+                height: 128px;
                 border-radius: 50%;
-                font-size: 42px;
+                font-size: 64px;
                 background: rgba(99, 102, 241, 0.35);
                 border: 2px solid rgba(251, 191, 36, 0.5);
                 backdrop-filter: blur(4px);
@@ -383,9 +385,13 @@
         /* Ajuste para telas muito pequenas no retrato */
         @media (max-width: 480px) and (orientation: portrait) {
             .mobile-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 28px;
+                width: 80px;
+                height: 80px;
+                font-size: 38px;
+            }
+            .mobile-btn.jump {
+                width: 95px;
+                height: 80px;
             }
             .hud-box {
                 font-size: 10px;
@@ -394,25 +400,48 @@
         }
         
         /* Ajuste para telas pequenas no paisagem */
-        @media (max-height: 450px) and (orientation: landscape) {
+        @media (max-height: 500px) and (orientation: landscape) {
             .mobile-btn.left, .mobile-btn.right {
-                width: 55px;
-                height: 55px;
-                font-size: 32px;
+                width: 75px;
+                height: 75px;
+                font-size: 44px;
             }
             .mobile-btn.jump {
-                width: 65px;
-                height: 65px;
-                font-size: 34px;
+                width: 90px;
+                height: 90px;
+                font-size: 48px;
             }
             .movement-buttons {
-                bottom: 10px;
-                left: 10px;
-                gap: 10px;
+                bottom: 20px;
+                left: 20px;
+                gap: 15px;
             }
             .jump-button-container {
-                bottom: 20px;
-                right: 20px;
+                bottom: 40px;
+                right: 40px;
+            }
+        }
+        
+        /* Ajuste para telas muito pequenas no paisagem */
+        @media (max-height: 380px) and (orientation: landscape) {
+            .mobile-btn.left, .mobile-btn.right {
+                width: 60px;
+                height: 60px;
+                font-size: 36px;
+            }
+            .mobile-btn.jump {
+                width: 75px;
+                height: 75px;
+                font-size: 40px;
+            }
+            .movement-buttons {
+                bottom: 12px;
+                left: 12px;
+                gap: 12px;
+            }
+            .jump-button-container {
+                bottom: 25px;
+                right: 25px;
             }
         }
     </style>
@@ -514,12 +543,12 @@
     const btnRight = document.getElementById('btn-right');
     const btnJump = document.getElementById('btn-jump');
 
-    // ========== FÍSICA - VALORES REDUZIDOS ==========
+    // ========== FÍSICA ==========
     const physics = { 
-        grav: 0.13,         // gravidade reduzida
-        speed: 2.4,         // velocidade mantida
-        jump: -12.0,        // pulo reduzido
-        maxJumpHold: -6.5,  // pulo mantido reduzido
+        grav: 0.13,
+        speed: 2.4,
+        jump: -12.0,
+        maxJumpHold: -6.5,
         acceleration: 0.42,
         friction: 0.8
     };
