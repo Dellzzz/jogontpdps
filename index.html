@@ -24,7 +24,6 @@
             height: 100%;
         }
         
-        /* Container do jogo - tela cheia */
         .game-wrapper {
             position: fixed;
             top: 0;
@@ -226,9 +225,6 @@
             left: 0;
             right: 0;
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            padding: 12px;
             z-index: 150;
             transition: all 0.2s ease;
         }
@@ -260,25 +256,45 @@
             border-color: #fbbf24;
         }
         
-        /* Modo RETRATO (altura > largura) - Botões quadrados maiores */
+        /* Modo RETRATO (altura > largura) - Botões lado a lado, pulo separado e maior */
         @media (orientation: portrait) {
             .mobile-controls {
                 bottom: 20px;
-                gap: 18px;
-                padding: 12px;
+                left: 0;
+                right: 0;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 30px;
+                padding: 15px;
             }
-            .mobile-btn {
-                width: 105px;
-                height: 105px;
+            
+            /* Container dos botões de movimento lado a lado */
+            .movement-buttons {
+                display: flex;
+                flex-direction: row;
+                gap: 20px;
+            }
+            
+            /* Botões de movimento */
+            .mobile-btn.left, .mobile-btn.right {
+                width: 100px;
+                height: 100px;
                 border-radius: 30px;
                 font-size: 48px;
                 background: rgba(30, 41, 59, 0.9);
             }
+            
+            /* Botão pular - MAIOR e separado */
             .mobile-btn.jump {
+                width: 130px;
+                height: 100px;
+                border-radius: 30px;
+                font-size: 52px;
                 background: rgba(99, 102, 241, 0.9);
-                width: 120px;
-                height: 105px;
+                margin-left: 10px;
             }
+            
             .hud-box {
                 font-size: 11px;
                 padding: 4px 10px;
@@ -293,7 +309,7 @@
             }
         }
         
-        /* Modo PAISAGEM (largura > altura) - Posicionamento específico com bordas dobradas e botões 50% maiores */
+        /* Modo PAISAGEM (largura > altura) - Distância das bordas TRIPLICADA */
         @media (orientation: landscape) {
             .mobile-controls {
                 position: fixed;
@@ -312,26 +328,26 @@
                 pointer-events: none;
             }
             
-            /* Container para botões de movimento (esquerda/direita) */
+            /* Container para botões de movimento - distância TRIPLICADA (30px -> 90px) */
             .movement-buttons {
                 position: absolute;
-                bottom: 30px;
-                left: 30px;
+                bottom: 90px;
+                left: 90px;
                 display: flex;
                 flex-direction: row;
-                gap: 22px;
+                gap: 25px;
                 pointer-events: auto;
             }
             
-            /* Botão pular isolado */
+            /* Botão pular isolado - distância TRIPLICADA (60px -> 180px) */
             .jump-button-container {
                 position: absolute;
-                bottom: 60px;
-                right: 60px;
+                bottom: 180px;
+                right: 180px;
                 pointer-events: auto;
             }
             
-            /* Botões de movimento - 50% maiores (70px -> 105px) */
+            /* Botões de movimento */
             .mobile-btn.left, .mobile-btn.right {
                 width: 105px;
                 height: 105px;
@@ -342,7 +358,7 @@
                 backdrop-filter: blur(4px);
             }
             
-            /* Botão pular - 50% maior (85px -> 128px) */
+            /* Botão pular */
             .mobile-btn.jump {
                 width: 128px;
                 height: 128px;
@@ -384,14 +400,22 @@
         
         /* Ajuste para telas muito pequenas no retrato */
         @media (max-width: 480px) and (orientation: portrait) {
-            .mobile-btn {
-                width: 80px;
-                height: 80px;
+            .mobile-controls {
+                gap: 15px;
+                padding: 10px;
+            }
+            .movement-buttons {
+                gap: 12px;
+            }
+            .mobile-btn.left, .mobile-btn.right {
+                width: 75px;
+                height: 75px;
                 font-size: 38px;
             }
             .mobile-btn.jump {
                 width: 95px;
-                height: 80px;
+                height: 75px;
+                font-size: 42px;
             }
             .hud-box {
                 font-size: 10px;
@@ -401,6 +425,15 @@
         
         /* Ajuste para telas pequenas no paisagem */
         @media (max-height: 500px) and (orientation: landscape) {
+            .movement-buttons {
+                bottom: 50px;
+                left: 50px;
+                gap: 15px;
+            }
+            .jump-button-container {
+                bottom: 100px;
+                right: 100px;
+            }
             .mobile-btn.left, .mobile-btn.right {
                 width: 75px;
                 height: 75px;
@@ -411,19 +444,19 @@
                 height: 90px;
                 font-size: 48px;
             }
-            .movement-buttons {
-                bottom: 20px;
-                left: 20px;
-                gap: 15px;
-            }
-            .jump-button-container {
-                bottom: 40px;
-                right: 40px;
-            }
         }
         
         /* Ajuste para telas muito pequenas no paisagem */
         @media (max-height: 380px) and (orientation: landscape) {
+            .movement-buttons {
+                bottom: 30px;
+                left: 30px;
+                gap: 12px;
+            }
+            .jump-button-container {
+                bottom: 60px;
+                right: 60px;
+            }
             .mobile-btn.left, .mobile-btn.right {
                 width: 60px;
                 height: 60px;
@@ -433,15 +466,6 @@
                 width: 75px;
                 height: 75px;
                 font-size: 40px;
-            }
-            .movement-buttons {
-                bottom: 12px;
-                left: 12px;
-                gap: 12px;
-            }
-            .jump-button-container {
-                bottom: 25px;
-                right: 25px;
             }
         }
     </style>
@@ -486,7 +510,6 @@
     </div>
 
 <script>
-    // Ajuste automático do canvas para tela cheia responsivo
     const viewport = document.getElementById('game-viewport');
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -495,18 +518,15 @@
         const windowWidth = window.innerWidth;
         const windowHeight = window.innerHeight;
         
-        // Proporção do jogo: 1280x720 (16:9)
         const gameRatio = 1280 / 720;
         const windowRatio = windowWidth / windowHeight;
         
         let width, height;
         
         if (windowRatio > gameRatio) {
-            // Tela mais larga que o jogo
             height = windowHeight;
             width = height * gameRatio;
         } else {
-            // Tela mais alta que o jogo
             width = windowWidth;
             height = width / gameRatio;
         }
@@ -514,7 +534,6 @@
         viewport.style.width = width + 'px';
         viewport.style.height = height + 'px';
         
-        // Ajustar canvas interno
         canvas.width = 1280;
         canvas.height = 720;
         canvas.style.width = '100%';
@@ -538,12 +557,11 @@
     const gameOverPanel = document.getElementById('game-over-panel');
     const restartBtn = document.getElementById('restart-game');
     
-    // Botões mobile
     const btnLeft = document.getElementById('btn-left');
     const btnRight = document.getElementById('btn-right');
     const btnJump = document.getElementById('btn-jump');
 
-    // ========== FÍSICA ==========
+    // FÍSICA
     const physics = { 
         grav: 0.13,
         speed: 2.4,
@@ -572,7 +590,6 @@
     let time = 0;
     let lives = 3;
     
-    // Checkpoint
     let checkpoint = { x: null, y: null, active: false, level: -1, coinsCollected: 0, hasKey: false, collectedCoinsIndices: [] };
     let checkpointFlagPos = null;
     let respawning = false;
@@ -581,7 +598,6 @@
     let clouds = [];
     let decorations = [];
 
-    // ========== PERGUNTAS ==========
     const questions = [
         { q: "Qual é o sujeito da frase: 'Os alunos chegaram cedo à escola'?", opts: ["chegaram", "escola", "Os alunos", "cedo"], ans: 2 },
         { q: "Quanto é 25 + 37?", opts: ["52", "62", "72", "82"], ans: 1 },
@@ -595,7 +611,6 @@
         { q: "Qual é o maior país da América do Sul?", opts: ["Argentina", "Chile", "Brasil", "Peru"], ans: 2 }
     ];
 
-    // ========== FASES ==========
     const levels = [
         { w: 2000, hasKey: false, totalCoins: 3, hasPit: true, checkpointPos: { x: 900, y: 550 },
           platforms: [{x:0,y:670,w:2000,h:50},{x:350,y:570,w:200,h:20},{x:650,y:480,w:200,h:20},{x:950,y:570,w:200,h:20},{x:1250,y:480,w:200,h:20},{x:1550,y:390,w:200,h:20}],
@@ -634,7 +649,6 @@
     let level;
     let keyCollected = false;
 
-    // Controles mobile
     let mobileLeft = false;
     let mobileRight = false;
     let mobileJump = false;
@@ -949,7 +963,6 @@
         optionsEl.appendChild(btn);
     }
 
-    // Colisão
     function applyCollision() {
         player.grounded = false;
         
@@ -1024,7 +1037,6 @@
             
             if(level.hasPit) tryActivateCheckpoint();
             
-            // Chave
             if(level.hasKey && level.keyPos && !keyCollected && !player.hasKey && !respawning) {
                 let keyX = level.keyPos.x, keyY = level.keyPos.y;
                 if(player.x < keyX + 22 && player.x + player.w > keyX &&
@@ -1040,7 +1052,6 @@
                 }
             }
             
-            // Moedas
             level.coins.forEach((c, idx) => {
                 if(!c.collected && !respawning &&
                    player.x < c.x + 22 && player.x + player.w > c.x &&
@@ -1063,7 +1074,6 @@
                 }
             });
             
-            // Portal
             let allCoinsCollected = (coinsCollected === totalCoinsInLevel);
             if(allCoinsCollected && !respawning) {
                 if(Math.random() > 0.9) spawnParticles(level.portal.x + Math.random()*50, level.portal.y + 70, '#c084fc', 1);
@@ -1159,7 +1169,6 @@
             roundRect(p.x, p.y, p.w, 14, 6);
         });
 
-        // Bandeira checkpoint
         if(level.hasPit && level.checkpointPos && !checkpoint.active) {
             let flagX = level.checkpointPos.x;
             let flagY = level.checkpointPos.y - 25;
@@ -1194,7 +1203,6 @@
             ctx.fillText("✓", flagX + 28, flagY - 32);
         }
 
-        // Chave
         if(level.hasKey && level.keyPos && !keyCollected && !player.hasKey && !respawning) {
             let keyGlow = Math.sin(time * 8) * 3;
             ctx.fillStyle = '#facc15';
@@ -1209,7 +1217,6 @@
             ctx.fill();
         }
 
-        // Portal
         let allCoinsCollected = (coinsCollected === totalCoinsInLevel);
         if(allCoinsCollected) {
             ctx.fillStyle = `rgba(168, 85, 247, ${0.45 + Math.sin(time*6)*0.2})`;
@@ -1235,7 +1242,6 @@
             ctx.fillRect(level.portal.x + 8, level.portal.y + 8, level.portal.w - 16, level.portal.h - 10);
         }
 
-        // Moedas
         level.coins.forEach(c => {
             if(!c.collected && !respawning) {
                 let hover = Math.sin(time * 3.5 + c.x) * 4;
@@ -1275,7 +1281,6 @@
         });
         ctx.globalAlpha = 1.0;
 
-        // Personagem
         let bounce = player.grounded ? Math.sin(time * 6) * 1.5 : 0;
         ctx.fillStyle = '#ef4444';
         roundRect(player.x, player.y + bounce, player.w, player.h, 8);
@@ -1310,7 +1315,6 @@
     startLevel(0);
     loop();
     
-    // Reajustar ao mudar orientação
     window.addEventListener('resize', () => {
         setTimeout(() => {
             resizeGame();
