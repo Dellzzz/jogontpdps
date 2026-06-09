@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Odisséia Educativa - Mobile Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body { 
+            margin: 0; padding: 0; 
+            background-color: #0f172a; 
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center; 
+            min-height: 100vh; font-family: 'Poppins', sans-serif; 
+            color: #f8fafc; 
+            overflow: hidden;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 1280px;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        #game-viewport { 
+            width: 1280px; 
+            height: 720px; 
+            max-width: 100%;
+            max-height: 70vh;
+            background: #87CEEB; 
+            border: 6px solid #1e293b; 
+            border-radius: 16px; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.6);
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #hud-container {
+            position: absolute; top: 20px; left: 20px; right: 20px;
+            display: flex; justify-content: space-between;
+            pointer-events: none; z-index: 10;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .hud-box {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 8px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s ease;
+        }
+        
+        .hud-warning {
+            background: rgba(239, 68, 68, 0.8);
+            animation: pulse-warning 0.8s infinite;
+        }
+        
+        @keyframes pulse-warning {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        
+        .portal-ready {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: #34d399;
+            color: #34d399;
+            animation: pulse-hud 1.5s infinite;
+        }
+
+        @keyframes pulse-hud {
+            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(52, 211, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+
+        #feedback-ui { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.95); display: none; 
+            flex-direction: column; justify-content: center; align-items: center; 
+            text-align: center; z-index: 100; backdrop-filter: blur(8px);
+        }
+
+        #question-text {
+            color: #fff; margin-bottom: 30px; font-size: 32px; padding: 0 40px; text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            max-width: 80%;
+        }
+
+        .option-btn { 
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 2px solid #6366f1;
+            color: #fff;
+            padding: 14px 28px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 12px;
+            font-size: 20px;
+            font-family: 'Poppins';
+            width: 100%;
+            max-width: 650px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .option-btn:hover { background: #6366f1; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(99, 102, 241, 0.4); }
+
+        #toast { 
+            position: absolute; top: 80px; left: 50%; transform: translateX(-50%); 
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px;
+            display: none;
+            z-index: 101;
+            color: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            white-space: nowrap;
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            pointer-events: none;
+        }
+
+        .instructions {
+            margin-top: 12px;
+            font-size: 16px;
+            color: #94a3b8;
+        }
+        .instructions span {
+            color: #6366f1;
+            font-weight: bold;
+            background: #1e293b;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        
+        #key-status {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.6);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        #game-over-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            backdrop-filter: blur(4px);
+        }
+        
+        #game-over-panel h2 {
+            font-size: 48px;
+            color: #ef4444;
+            margin-bottom: 20px;
+        }
+        
+        #game-over-panel button {
+            background: #6366f1;
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-size: 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: 'Poppins';
+            transition: 0.2s;
+        }
+        
+        #game-over-panel button:hover {
+            background: #8183f5;
+            transform: scale(1.05);
+        }
+        
+        /* Botões Mobile */
+        .mobile-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 10px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            z-index: 150;
+            display: none;
+        }
+        
+        .mobile-btn {
+            background: rgba(30, 41, 59, 0.9);
+            border: 2px solid #6366f1;
+            border-radius: 60px;
+            padding: 15px 30px;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            min-width: 100px;
+            transition: 0.1s;
+        }
+        
+        .mobile-btn:active {
+            transform: scale(0.95);
+            background: #6366f1;
+        }
+        
+        .mobile-btn.left {
+            background: rgba(30, 41, 59, 0.9);
+        }
+        
+        .mobile-btn.right {
+            background: rgba(30, 41, 59, 0.9);
+        }
+        
+        .mobile-btn.jump {
+            background: rgba(99, 102, 241, 0.9);
+            border-color: #fbbf24;
+        }
+        
+        @media (max-width: 1024px) {
+            .mobile-controls {
+                display: flex;
+            }
+            .instructions {
+                display: none;
+            }
+            .hud-box {
+                padding: 5px 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="game-viewport">
+            <div id="hud-container">
+                <div class="hud-box" id="hud-level">🗺️ Nível: 1</div>
+                <div class="hud-box" id="hud-coins">🪙 Moedas: 0/3</div>
+                <div class="hud-box" id="hud-lives">❤️ Vidas: 3</div>
+            </div>
+            <div id="key-status"></div>
+            <div id="toast"></div>
+
+            <canvas id="gameCanvas" width="1280" height="720"></canvas>
+            
+            <div id="feedback-ui">
+                <h3 id="question-text">Pergunta?</h3>
+                <div id="options-box"></div>
+            </div>
+            
+            <div id="game-over-panel">
+                <h2>💀 GAME OVER 💀</h2>
+                <button id="restart-game">Jogar Novamente</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        Controles: <span>◀ ▶</span> ou <span>A / D</span> mover | <span>ESPAÇO</span> ou <span>▲</span> pular (segure para pular mais alto)
+    </div>
+    
+    <div class="mobile-controls">
+        <div class="mobile-btn left" id="btn-left">◀</div>
+        <div class="mobile-btn right" id="btn-right">▶</div>
+        <div class="mobile-btn jump" id="btn-jump">PULAR</div>
+    </div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const hudLevel = document.getElementById('hud-level');
+    const hudCoins = document.getElementById('hud-coins');
+    const hudLives = document.getElementById('hud-lives');
+    const keyStatus = document.getElementById('key-status');
+    const toast = document.getElementById('toast');
+    const ui = document.getElementById('feedback-ui');
+    const questionEl = document.getElementById('question-text');
+    const optionsEl = document.getElementById('options-box');
+    const gameOverPanel = document.getElementById('game-over-panel');
+    const restartBtn = document.getElementById('restart-game');
+    
+    // Botões mobile
+    const btnLeft = document.getElementById('btn-left');
+    const btnRight = document.getElementById('btn-right');
+    const btnJump = document.getElementById('btn-jump');
+
+    // ========== FÍSICA ==========
+    const physics = { 
+        grav: 0.13,
+        speed: 1.6,
+        jump: -12.0,
+        maxJumpHold: -6.5,
+        acceleration: 0.28,
+        friction: 0.87
+    };
+    
+    const player = { 
+        x: 50, y: 450, w: 32, h: 32, 
+        vx: 0, vy: 0, 
+        grounded: false,
+        hasKey: false,
+        jumpHeld: false,
+        jumpTimer: 0
+    };
+    
+    const camera = { x: 0 };
+    const keys = {};
+
+    let currentLevel = 0;
+    let coinsCollected = 0;
+    let totalCoinsInLevel = 3;
+    let isQuizActive = false;
+    let time = 0;
+    let lives = 3;
+    
+    // Checkpoint salva também as moedas coletadas
+    let checkpoint = { x: null, y: null, active: false, level: -1, coinsCollected: 0, hasKey: false, collectedCoinsIndices: [] };
+    let checkpointFlagPos = null;
+    let respawning = false;
+
+    let particles = [];
+    let clouds = [];
+    let decorations = [];
+
+    // ========== PERGUNTAS ==========
+    const questions = [
+        { q: "Qual é o sujeito da frase: 'Os alunos chegaram cedo à escola'?", opts: ["chegaram", "escola", "Os alunos", "cedo"], ans: 2 },
+        { q: "Quanto é 25 + 37?", opts: ["52", "62", "72", "82"], ans: 1 },
+        { q: "Quem foi o primeiro presidente do Brasil?", opts: ["Getúlio Vargas", "Dom Pedro II", "Deodoro da Fonseca", "Juscelino Kubitschek"], ans: 2 },
+        { q: "Qual é o planeta conhecido como 'Planeta Vermelho'?", opts: ["Terra", "Marte", "Júpiter", "Saturno"], ans: 1 },
+        { q: "Qual órgão do corpo humano bombeia o sangue?", opts: ["Pulmão", "Rim", "Coração", "Estômago"], ans: 2 },
+        { q: "Qual alternativa apresenta um sinônimo da palavra 'feliz'?", opts: ["triste", "alegre", "bravo", "cansado"], ans: 1 },
+        { q: "Em qual frase o verbo está no passado?", opts: ["Eu estudo matemática.", "Nós iremos viajar.", "Ela brincou no parque.", "Eles cantam muito bem."], ans: 2 },
+        { q: "Qual é o resultado de 9 × 8?", opts: ["72", "81", "64", "56"], ans: 0 },
+        { q: "Um triângulo possui quantos lados?", opts: ["2", "3", "4", "5"], ans: 1 },
+        { q: "Qual é o maior país da América do Sul?", opts: ["Argentina", "Chile", "Brasil", "Peru"], ans: 2 }
+    ];
+
+    // ========== FASES ==========
+    // hasPit = true = fase com buraco/risco (tem checkpoint)
+    // hasPit = false = fase segura (sem checkpoint)
+    const levels = [
+        { w: 2000, hasKey: false, totalCoins: 3, hasPit: true, checkpointPos: { x: 900, y: 550 },
+          platforms: [{x:0,y:670,w:2000,h:50},{x:350,y:570,w:200,h:20},{x:650,y:480,w:200,h:20},{x:950,y:570,w:200,h:20},{x:1250,y:480,w:200,h:20},{x:1550,y:390,w:200,h:20}],
+          coins: [{x:440,y:520},{x:740,y:430},{x:1640,y:340}], portal: {x:1850,y:590,w:50,h:80}, keyPos: null },
+        { w: 2000, hasKey: false, totalCoins: 3, hasPit: true, checkpointPos: { x: 1100, y: 650 },
+          platforms: [{x:0,y:670,w:600,h:50},{x:680,y:580,w:120,h:20},{x:880,y:670,w:1120,h:50},{x:1050,y:560,w:150,h:20},{x:1300,y:470,w:150,h:20},{x:1550,y:560,w:150,h:20}],
+          coins: [{x:725,y:530},{x:1360,y:420},{x:1800,y:620}], portal: {x:1900,y:590,w:50,h:80}, keyPos: null },
+        { w: 2000, hasKey: false, totalCoins: 3, hasPit: true, checkpointPos: { x: 1300, y: 380 },
+          platforms: [{x:0,y:670,w:2000,h:50},{x:300,y:570,w:500,h:100},{x:180,y:600,w:100,h:20},{x:450,y:490,w:200,h:20},{x:880,y:580,w:150,h:20},{x:1100,y:490,w:150,h:20},{x:1320,y:400,w:150,h:20},{x:1540,y:310,w:150,h:20}],
+          coins: [{x:540,y:440},{x:1160,y:440},{x:1600,y:260}], portal: {x:1850,y:590,w:50,h:80}, keyPos: null },
+        { w: 2500, hasKey: false, totalCoins: 3, hasPit: true, checkpointPos: { x: 1500, y: 650 },
+          platforms: [{x:0,y:670,w:500,h:50},{x:580,y:600,w:120,h:20},{x:780,y:530,w:120,h:20},{x:980,y:460,w:120,h:20},{x:1180,y:670,w:500,h:50},{x:1750,y:600,w:120,h:20},{x:1950,y:530,w:120,h:20},{x:2150,y:620,w:350,h:100}],
+          coins: [{x:820,y:480},{x:1400,y:620},{x:1990,y:480}], portal: {x:2350,y:540,w:50,h:80}, keyPos: null },
+        { w: 3500, hasKey: false, totalCoins: 3, hasPit: true, checkpointPos: { x: 2000, y: 650 },
+          platforms: [{x:0,y:670,w:400,h:50},{x:480,y:600,w:120,h:20},{x:680,y:530,w:120,h:20},{x:880,y:460,w:120,h:20},{x:1080,y:390,w:400,h:20},{x:1560,y:460,w:120,h:20},{x:1760,y:530,w:120,h:20},{x:1960,y:670,w:500,h:50},{x:2540,y:600,w:80,h:20},{x:2700,y:530,w:80,h:20},{x:2860,y:460,w:80,h:20},{x:3020,y:390,w:80,h:20},{x:3180,y:570,w:320,h:150}],
+          coins: [{x:1250,y:340},{x:2210,y:620},{x:3040,y:340}], portal: {x:3350,y:490,w:50,h:80}, keyPos: null },
+        { w: 2200, hasKey: false, totalCoins: 3, hasPit: false, checkpointPos: null,
+          platforms: [{x:0,y:670,w:300,h:50},{x:350,y:620,w:150,h:20},{x:550,y:550,w:200,h:20},{x:800,y:620,w:150,h:20},{x:1000,y:550,w:200,h:20},{x:1250,y:620,w:150,h:20},{x:1450,y:500,w:200,h:20},{x:1700,y:620,w:500,h:50}],
+          coins: [{x:410,y:570},{x:650,y:500},{x:1550,y:450}], portal: {x:2050,y:540,w:50,h:80}, keyPos: null },
+        { w: 2400, hasKey: false, totalCoins: 4, hasPit: false, checkpointPos: null,
+          platforms: [{x:0,y:670,w:400,h:50},{x:450,y:600,w:120,h:20},{x:650,y:530,w:120,h:20},{x:850,y:460,w:120,h:20},{x:1000,y:420,w:180,h:250},{x:1250,y:600,w:120,h:20},{x:1450,y:530,w:120,h:20},{x:1650,y:600,w:120,h:20},{x:1850,y:670,w:550,h:50}],
+          coins: [{x:520,y:550},{x:720,y:480},{x:1080,y:370},{x:1750,y:550}], portal: {x:2250,y:590,w:50,h:80}, keyPos: null },
+        { w: 2800, hasKey: true, totalCoins: 5, hasPit: true, checkpointPos: { x: 1700, y: 530 },
+          platforms: [{x:0,y:670,w:500,h:50},{x:550,y:600,w:100,h:20},{x:700,y:530,w:100,h:20},{x:850,y:460,w:100,h:20},{x:1000,y:600,w:150,h:20},{x:1200,y:670,w:400,h:50},{x:1650,y:550,w:120,h:20},{x:1820,y:480,w:120,h:20},{x:2000,y:410,w:120,h:20},{x:2150,y:530,w:150,h:20},{x:2350,y:620,w:450,h:50},{x:2500,y:550,w:100,h:20}],
+          coins: [{x:600,y:550},{x:760,y:480},{x:910,y:410},{x:1300,y:620, locked: true},{x:2200,y:480}],
+          portal: {x:2650,y:540,w:50,h:80}, keyPos: {x:2550, y:500, w:20, h:20} },
+        { w: 2600, hasKey: false, totalCoins: 4, hasPit: false, checkpointPos: null,
+          platforms: [{x:0,y:670,w:350,h:50},{x:400,y:600,w:120,h:20},{x:580,y:530,w:120,h:20},{x:760,y:460,w:180,h:250},{x:1050,y:670,w:300,h:50},{x:1400,y:600,w:120,h:20},{x:1600,y:530,w:180,h:250},{x:1900,y:670,w:700,h:50}],
+          coins: [{x:480,y:550},{x:850,y:410},{x:1480,y:550},{x:1690,y:480}], portal: {x:2450,y:590,w:50,h:80}, keyPos: null },
+        { w: 3000, hasKey: true, totalCoins: 5, hasPit: true, checkpointPos: { x: 2000, y: 650 },
+          platforms: [{x:0,y:670,w:400,h:50},{x:450,y:620,w:100,h:20},{x:600,y:550,w:100,h:20},{x:750,y:480,w:100,h:20},{x:900,y:620,w:150,h:20},{x:1100,y:670,w:400,h:50},{x:1550,y:580,w:120,h:20},{x:1720,y:510,w:120,h:20},{x:1900,y:440,w:120,h:20},{x:2080,y:580,w:120,h:20},{x:2250,y:670,w:400,h:50},{x:2700,y:550,w:100,h:20}],
+          coins: [{x:510,y:570},{x:660,y:500},{x:810,y:430},{x:1650,y:530},{x:2400,y:620, locked: true}],
+          portal: {x:2850,y:590,w:50,h:80}, keyPos: {x:2750, y:500, w:20, h:20} }
+    ];
+
+    let level;
+    let keyCollected = false;
+
+    // ========== CONTROLES MOBILE ==========
+    let mobileLeft = false;
+    let mobileRight = false;
+    let mobileJump = false;
+    let mobileJumpJustPressed = false;
+    
+    btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); mobileLeft = true; });
+    btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); mobileLeft = false; });
+    btnLeft.addEventListener('mousedown', () => { mobileLeft = true; });
+    btnLeft.addEventListener('mouseup', () => { mobileLeft = false; });
+    
+    btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); mobileRight = true; });
+    btnRight.addEventListener('touchend', (e) => { e.preventDefault(); mobileRight = false; });
+    btnRight.addEventListener('mousedown', () => { mobileRight = true; });
+    btnRight.addEventListener('mouseup', () => { mobileRight = false; });
+    
+    btnJump.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); 
+        mobileJump = true;
+        mobileJumpJustPressed = true;
+    });
+    btnJump.addEventListener('touchend', (e) => { e.preventDefault(); mobileJump = false; });
+    btnJump.addEventListener('mousedown', () => { 
+        mobileJump = true;
+        mobileJumpJustPressed = true;
+    });
+    btnJump.addEventListener('mouseup', () => { mobileJump = false; });
+    
+    // Prevenir scroll na tela ao tocar nos botões
+    document.querySelectorAll('.mobile-btn').forEach(btn => {
+        btn.addEventListener('touchmove', (e) => e.preventDefault());
+    });
+
+    window.addEventListener('keydown', e => keys[e.code] = true);
+    window.addEventListener('keyup', e => keys[e.code] = false);
+    
+    restartBtn.onclick = () => {
+        gameOverPanel.style.display = 'none';
+        lives = 3;
+        startLevel(0);
+    };
+
+    function showTopMessage(msg, isError = false) {
+        toast.innerText = msg;
+        toast.style.background = isError ? '#ef4444' : '#10b981';
+        toast.style.display = 'block';
+        setTimeout(() => {
+            if(toast.innerText === msg) toast.style.display = 'none';
+        }, 2500);
+    }
+
+    function spawnParticles(x, y, color, amount) {
+        for(let i = 0; i < amount; i++) {
+            particles.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 5,
+                vy: (Math.random() - 0.5) * 5 - 2,
+                life: 1.0,
+                decay: Math.random() * 0.02 + 0.01,
+                color: color,
+                size: Math.random() * 4 + 2
+            });
+        }
+    }
+
+    function generateEnvironment(lvlWidth) {
+        clouds = []; decorations = [];
+        let numClouds = Math.floor(lvlWidth / 200);
+        for(let i=0; i<numClouds; i++) {
+            clouds.push({
+                x: Math.random() * lvlWidth,
+                y: Math.random() * 200 + 20,
+                speed: Math.random() * 0.15 + 0.08,
+                size: Math.random() * 25 + 35
+            });
+        }
+        level.platforms.forEach(p => {
+            if(p.w > 150 && p.y > 400) {
+                let numTrees = Math.floor(p.w / 180);
+                for(let i=0; i<numTrees; i++) {
+                    decorations.push({
+                        x: p.x + 40 + Math.random() * (p.w - 80),
+                        y: p.y,
+                        type: Math.random() > 0.5 ? 'tree1' : 'tree2'
+                    });
+                }
+            }
+        });
+    }
+
+    function saveToCheckpoint() {
+        if(!level.hasPit) return;
+        if(checkpoint.active && checkpoint.level === currentLevel) return;
+        
+        // Salva o estado atual no checkpoint
+        checkpoint = { 
+            x: player.x, 
+            y: player.y, 
+            active: true, 
+            level: currentLevel,
+            coinsCollected: coinsCollected,
+            hasKey: player.hasKey,
+            collectedCoinsIndices: level.coins.map((c, idx) => c.collected ? idx : -1).filter(i => i !== -1)
+        };
+        
+        // Marca a posição da bandeira
+        if(level.checkpointPos) {
+            checkpointFlagPos = { x: level.checkpointPos.x, y: level.checkpointPos.y };
+        }
+    }
+    
+    function restoreFromCheckpoint() {
+        if(!checkpoint.active || checkpoint.level !== currentLevel) return false;
+        
+        player.x = checkpoint.x;
+        player.y = checkpoint.y;
+        player.hasKey = checkpoint.hasKey;
+        keyCollected = checkpoint.hasKey;
+        coinsCollected = checkpoint.coinsCollected;
+        
+        // Restaura moedas coletadas
+        level.coins.forEach((c, idx) => {
+            c.collected = checkpoint.collectedCoinsIndices.includes(idx);
+        });
+        
+        return true;
+    }
+
+    function respawnAtCheckpoint() {
+        let restored = false;
+        
+        if(checkpoint.active && checkpoint.level === currentLevel && level.hasPit) {
+            restored = restoreFromCheckpoint();
+        }
+        
+        if(!restored) {
+            player.x = 50;
+            player.y = 420;
+            player.hasKey = false;
+            keyCollected = false;
+            coinsCollected = 0;
+            level.coins.forEach(c => c.collected = false);
+        }
+        
+        respawning = true;
+        player.vx = 0;
+        player.vy = 0;
+        
+        updateHUD();
+        setTimeout(() => { respawning = false; }, 500);
+    }
+
+    function loseLife() {
+        lives--;
+        updateHUD();
+        
+        if(lives === 1) {
+            showTopMessage("⚠️ ÚLTIMA VIDA! CUIDADO! ⚠️", true);
+        } else {
+            showTopMessage(`💔 Vida perdida! Restam ${lives} vidas`, true);
+        }
+        
+        if(lives <= 0) {
+            gameOverPanel.style.display = 'flex';
+            isQuizActive = true;
+            return;
+        }
+        
+        respawnAtCheckpoint();
+    }
+
+    function tryActivateCheckpoint() {
+        // Só ativa checkpoint se a fase TEM risco (hasPit = true) e ainda não foi ativado
+        if(!level.hasPit) return;
+        if(checkpoint.active && checkpoint.level === currentLevel) return;
+        
+        let cp = level.checkpointPos;
+        if(!cp) return;
+        
+        // Verifica se o jogador está em cima da posição do checkpoint
+        let checkpointPlatformX = cp.x;
+        let checkpointPlatformY = cp.y - 25;
+        
+        if(player.x + player.w > checkpointPlatformX && player.x < checkpointPlatformX + 40 &&
+           player.y + player.h > checkpointPlatformY && player.y < checkpointPlatformY + 30) {
+            
+            saveToCheckpoint();
+            showTopMessage("🏁 CHECKPOINT ATIVADO! (moedas salvas) 🏁", false);
+            spawnParticles(cp.x + 20, cp.y - 20, '#ef4444', 25);
+            updateHUD();
+        }
+    }
+
+    function startLevel(idx) {
+        currentLevel = idx;
+        level = JSON.parse(JSON.stringify(levels[idx]));
+        player.x = 50;
+        player.y = 420;
+        player.vx = 0;
+        player.vy = 0;
+        player.hasKey = false;
+        keyCollected = false;
+        coinsCollected = 0;
+        totalCoinsInLevel = level.totalCoins;
+        camera.x = 0;
+        particles = [];
+        
+        // Reset checkpoint apenas para fases com risco
+        if(level.hasPit) {
+            checkpoint = { x: null, y: null, active: false, level: -1, coinsCollected: 0, hasKey: false, collectedCoinsIndices: [] };
+            checkpointFlagPos = null;
+        } else {
+            checkpoint = { x: null, y: null, active: false, level: -1, coinsCollected: 0, hasKey: false, collectedCoinsIndices: [] };
+            checkpointFlagPos = null;
+        }
+        
+        hudLevel.innerText = `🗺️ Nível: ${currentLevel + 1}`;
+        hudLives.innerText = `❤️ Vidas: ${lives}`;
+        
+        generateEnvironment(level.w);
+        
+        if(level.hasKey && level.keyPos) {
+            level.keyExists = true;
+            level.keyCollectedLocal = false;
+        }
+        
+        level.coins.forEach((c, i) => {
+            if(c.locked) c.isLocked = true;
+            c.collected = false;
+        });
+        
+        updateHUD();
+    }
+
+    function updateHUD() {
+        let maxCoins = totalCoinsInLevel;
+        let remainingCoins = level.coins.filter(c => !c.collected).length;
+        let displayCoinText = `🪙 Moedas: ${coinsCollected}/${maxCoins}`;
+        
+        if(remainingCoins === 0 && coinsCollected === maxCoins) {
+            displayCoinText = `✨ TODAS AS MOEDAS! ✨`;
+            hudCoins.classList.add('portal-ready');
+            showTopMessage("🌟 TODAS AS MOEDAS COLETADAS! PROCURE O PORTAL! 🌟", false);
+        } else if(remainingCoins > 0 && coinsCollected === maxCoins - 1 && maxCoins > 3) {
+            displayCoinText = `🪙 Moedas: ${coinsCollected}/${maxCoins} (FALTA 1!)`;
+        } else {
+            hudCoins.classList.remove('portal-ready');
+        }
+        
+        if(level.hasKey && !player.hasKey && level.keyPos && !keyCollected) {
+            displayCoinText += ` 🔒`;
+        } else if(level.hasKey && player.hasKey) {
+            displayCoinText += ` 🔑`;
+        }
+        
+        hudCoins.innerText = displayCoinText;
+        
+        if(lives === 1) hudLives.classList.add('hud-warning');
+        else hudLives.classList.remove('hud-warning');
+        
+        if(level.hasKey && player.hasKey) {
+            keyStatus.innerText = "🔑 Possui Chave!";
+            keyStatus.style.background = "rgba(234,179,8,0.8)";
+        } else if(level.hasKey && level.keyPos && !keyCollected) {
+            keyStatus.innerText = "🔒 Chave no mapa!";
+            keyStatus.style.background = "rgba(100,100,100,0.7)";
+        } else {
+            keyStatus.innerText = "";
+        }
+    }
+
+    function showQuizResult(correct) {
+        if(correct) {
+            showTopMessage("✅ RESPOSTA CORRETA! ✅", false);
+        } else {
+            showTopMessage("❌ RESPOSTA ERRADA! TENTE NOVAMENTE! ❌", true);
+        }
+    }
+
+    function triggerQuiz() {
+        isQuizActive = true;
+        ui.style.display = 'flex';
+        const q = questions[currentLevel % questions.length];
+        questionEl.innerText = q.q;
+        optionsEl.innerHTML = '';
+        q.opts.forEach((o, i) => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.innerText = o;
+            btn.onclick = () => {
+                if(i === q.ans) {
+                    showQuizResult(true);
+                    ui.style.display = 'none';
+                    isQuizActive = false;
+                    if(currentLevel < levels.length - 1) startLevel(currentLevel + 1);
+                    else showEndScreen();
+                } else {
+                    showQuizResult(false);
+                    ui.style.display = 'none';
+                    isQuizActive = false;
+                    startLevel(currentLevel);
+                }
+            };
+            optionsEl.appendChild(btn);
+        });
+    }
+
+    function showEndScreen() {
+        isQuizActive = true;
+        ui.style.display = 'flex';
+        questionEl.innerText = "🏆 PARABÉNS!\nVocê finalizou a Odisséia Educativa!";
+        optionsEl.innerHTML = '';
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = "Jogar Novamente";
+        btn.onclick = () => {
+            ui.style.display = 'none';
+            isQuizActive = false;
+            lives = 3;
+            startLevel(0);
+        };
+        optionsEl.appendChild(btn);
+    }
+
+    // ========== COLISÃO ==========
+    function applyCollision() {
+        player.grounded = false;
+        
+        player.x += player.vx;
+        for(let p of level.platforms) {
+            if(player.x < p.x + p.w && player.x + player.w > p.x &&
+               player.y + player.h > p.y && player.y < p.y + p.h) {
+                if(player.vx > 0) player.x = p.x - player.w;
+                if(player.vx < 0) player.x = p.x + p.w;
+            }
+        }
+        
+        player.y += player.vy;
+        for(let p of level.platforms) {
+            if(player.x < p.x + p.w && player.x + player.w > p.x &&
+               player.y + player.h > p.y && player.y < p.y + p.h) {
+                if(player.vy > 0) {
+                    player.y = p.y - player.h;
+                    player.grounded = true;
+                    player.vy = 0;
+                    player.jumpTimer = 0;
+                }
+                if(player.vy < 0) {
+                    player.y = p.y + p.h;
+                    player.vy = 0;
+                }
+            }
+        }
+        
+        if(player.x < 0) player.x = 0;
+        if(player.x + player.w > level.w) player.x = level.w - player.w;
+        if(player.y > canvas.height + 100 && !respawning) loseLife();
+    }
+
+    function update() {
+        if(!isQuizActive && !respawning && lives > 0) {
+            time += 0.04;
+            
+            // Controles combinados (teclado + mobile)
+            let targetVx = 0;
+            let isLeft = (keys['ArrowLeft'] || keys['KeyA'] || mobileLeft);
+            let isRight = (keys['ArrowRight'] || keys['KeyD'] || mobileRight);
+            
+            if(isLeft) targetVx = -physics.speed;
+            if(isRight) targetVx = physics.speed;
+            
+            player.vx += (targetVx - player.vx) * physics.acceleration;
+            if(Math.abs(targetVx) < 0.1 && Math.abs(player.vx) > 0.1) {
+                player.vx *= physics.friction;
+            }
+            
+            let jumpPressed = (keys['Space'] || keys['ArrowUp'] || keys['KeyW'] || mobileJump);
+            let jumpJustPressed = (keys['Space'] && !keys['SpacePrev']) || (keys['ArrowUp'] && !keys['ArrowUpPrev']) || mobileJumpJustPressed;
+            
+            keys['SpacePrev'] = keys['Space'];
+            keys['ArrowUpPrev'] = keys['ArrowUp'];
+            
+            if(jumpPressed && player.grounded) {
+                player.vy = physics.jump;
+                player.grounded = false;
+                player.jumpHeld = true;
+                player.jumpTimer = 8;
+                spawnParticles(player.x + 16, player.y + player.h, '#e2e8f0', 6);
+            }
+            
+            mobileJumpJustPressed = false;
+            
+            if(player.jumpHeld && jumpPressed && player.vy < 0 && player.jumpTimer > 0) {
+                player.vy = Math.max(player.vy, physics.maxJumpHold);
+                player.jumpTimer--;
+            } else {
+                player.jumpHeld = false;
+            }
+            
+            player.vy += physics.grav;
+            applyCollision();
+            
+            // Ativar checkpoint (apenas em fases com risco)
+            if(level.hasPit) {
+                tryActivateCheckpoint();
+            }
+            
+            // Chave
+            if(level.hasKey && level.keyPos && !keyCollected && !player.hasKey && !respawning) {
+                let keyX = level.keyPos.x, keyY = level.keyPos.y;
+                if(player.x < keyX + 22 && player.x + player.w > keyX &&
+                   player.y < keyY + 22 && player.y + player.h > keyY) {
+                    keyCollected = true;
+                    player.hasKey = true;
+                    spawnParticles(keyX + 12, keyY + 12, '#facc15', 30);
+                    showTopMessage("🔑 CHAVE OBTIDA! AGORA PEGUE A MOEDA TRANCADA! 🔑", false);
+                    updateHUD();
+                    // Se checkpoint já existe, atualiza estado da chave
+                    if(checkpoint.active && checkpoint.level === currentLevel) {
+                        checkpoint.hasKey = true;
+                    }
+                }
+            }
+            
+            // Moedas
+            level.coins.forEach((c, idx) => {
+                if(!c.collected && !respawning &&
+                   player.x < c.x + 22 && player.x + player.w > c.x &&
+                   player.y < c.y + 22 && player.y + player.h > c.y) {
+                    if(c.locked && (!player.hasKey || !level.hasKey)) {
+                        showTopMessage("🔒 MOEDA TRANCADA! ENCONTRE A CHAVE PRIMEIRO! 🔒", true);
+                        return;
+                    }
+                    c.collected = true;
+                    coinsCollected++;
+                    spawnParticles(c.x + 12, c.y + 12, '#fbbf24', 15);
+                    updateHUD();
+                    if(coinsCollected === totalCoinsInLevel) {
+                        showTopMessage("🌟 TODAS AS MOEDAS COLETADAS! VÁ PARA O PORTAL! 🌟", false);
+                    }
+                    // Se checkpoint existe, atualiza estado das moedas
+                    if(checkpoint.active && checkpoint.level === currentLevel) {
+                        checkpoint.coinsCollected = coinsCollected;
+                        checkpoint.collectedCoinsIndices = level.coins.map((c2, i2) => c2.collected ? i2 : -1).filter(i2 => i2 !== -1);
+                    }
+                }
+            });
+            
+            // Portal
+            let allCoinsCollected = (coinsCollected === totalCoinsInLevel);
+            if(allCoinsCollected && !respawning) {
+                if(Math.random() > 0.9) spawnParticles(level.portal.x + Math.random()*50, level.portal.y + 70, '#c084fc', 1);
+                
+                if(player.x < level.portal.x + 55 && player.x + player.w > level.portal.x &&
+                   player.y < level.portal.y + 85 && player.y + player.h > level.portal.y) {
+                    player.x = level.portal.x + (level.portal.w / 2) - (player.w / 2);
+                    player.vx = 0;
+                    triggerQuiz();
+                }
+            }
+            
+            // Partículas
+            for(let i=particles.length-1; i>=0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.08;
+                p.life -= p.decay;
+                if(p.life <= 0) particles.splice(i, 1);
+            }
+            
+            clouds.forEach(c => {
+                c.x += c.speed;
+                if(c.x > level.w + 100) c.x = -100;
+            });
+            
+            if(level.w > canvas.width) {
+                let targetX = player.x - canvas.width / 2;
+                if(targetX < 0) targetX = 0;
+                if(targetX > level.w - canvas.width) targetX = level.w - canvas.width;
+                camera.x += (targetX - camera.x) * 0.12;
+            } else {
+                camera.x = 0;
+            }
+        }
+    }
+
+    function roundRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.fill();
+    }
+
+    function draw() {
+        let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, '#38bdf8');
+        grad.addColorStop(1, '#e0f2fe');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.translate(-camera.x, 0);
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        clouds.forEach(c => {
+            ctx.beginPath();
+            ctx.arc(c.x, c.y, c.size, 0, Math.PI*2);
+            ctx.arc(c.x + c.size*0.7, c.y - c.size*0.25, c.size*0.7, 0, Math.PI*2);
+            ctx.arc(c.x + c.size*1.1, c.y, c.size*0.55, 0, Math.PI*2);
+            ctx.fill();
+        });
+
+        decorations.forEach(d => {
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(d.x - 4, d.y - 35, 8, 35);
+            ctx.fillStyle = d.type === 'tree1' ? '#166534' : '#15803d';
+            ctx.beginPath();
+            ctx.moveTo(d.x, d.y - 70);
+            ctx.lineTo(d.x + 22, d.y - 25);
+            ctx.lineTo(d.x - 22, d.y - 25);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(d.x, d.y - 90);
+            ctx.lineTo(d.x + 17, d.y - 45);
+            ctx.lineTo(d.x - 17, d.y - 45);
+            ctx.fill();
+        });
+
+        level.platforms.forEach(p => {
+            ctx.fillStyle = '#854d0e';
+            ctx.fillRect(p.x, p.y + 8, p.w, p.h - 8);
+            ctx.fillStyle = '#713f12';
+            ctx.fillRect(p.x, p.y + 8, p.w, 4);
+            ctx.fillStyle = '#22c55e';
+            roundRect(p.x, p.y, p.w, 14, 6);
+        });
+
+        // BANDEIRA VERMELHA DO CHECKPOINT (apenas em fases com risco e não ativado)
+        if(level.hasPit && level.checkpointPos && !checkpoint.active) {
+            let flagX = level.checkpointPos.x;
+            let flagY = level.checkpointPos.y - 25;
+            let flagWave = Math.sin(time * 3) * 3;
+            
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(flagX + 18, flagY - 35, 4, 60);
+            
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(flagX + 22, flagY - 35);
+            ctx.lineTo(flagX + 52 + flagWave, flagY - 28);
+            ctx.lineTo(flagX + 22, flagY - 21);
+            ctx.fill();
+            
+            ctx.fillStyle = '#fef08a';
+            ctx.font = "bold 20px Poppins";
+            ctx.fillText("🏁", flagX + 8, flagY - 38);
+            
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(flagX, flagY - 10, 40, 20);
+            ctx.globalAlpha = 1;
+        }
+        
+        // Bandeira já ativada (checkpoint salvo)
+        if(level.hasPit && checkpoint.active && checkpoint.level === currentLevel && checkpointFlagPos) {
+            let flagX = checkpointFlagPos.x;
+            let flagY = checkpointFlagPos.y - 25;
+            
+            ctx.fillStyle = '#78350f';
+            ctx.fillRect(flagX + 18, flagY - 35, 4, 60);
+            
+            ctx.fillStyle = '#22c55e';
+            ctx.beginPath();
+            ctx.moveTo(flagX + 22, flagY - 35);
+            ctx.lineTo(flagX + 52, flagY - 28);
+            ctx.lineTo(flagX + 22, flagY - 21);
+            ctx.fill();
+            
+            ctx.fillStyle = '#fef08a';
+            ctx.font = "bold 20px Poppins";
+            ctx.fillText("✓", flagX + 28, flagY - 32);
+        }
+
+        // Chave
+        if(level.hasKey && level.keyPos && !keyCollected && !player.hasKey && !respawning) {
+            let keyGlow = Math.sin(time * 8) * 3;
+            ctx.fillStyle = '#facc15';
+            ctx.beginPath();
+            ctx.arc(level.keyPos.x + 12, level.keyPos.y + 12 + keyGlow, 14, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#ca8a04';
+            ctx.fillRect(level.keyPos.x + 7, level.keyPos.y + 5 + keyGlow, 10, 16);
+            ctx.fillStyle = '#fef08a';
+            ctx.beginPath();
+            ctx.arc(level.keyPos.x + 12, level.keyPos.y + 12 + keyGlow, 6, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // Portal
+        let allCoinsCollected = (coinsCollected === totalCoinsInLevel);
+        if(allCoinsCollected) {
+            ctx.fillStyle = `rgba(168, 85, 247, ${0.45 + Math.sin(time*6)*0.2})`;
+            ctx.fillRect(level.portal.x - 6, level.portal.y - 6, level.portal.w + 12, level.portal.h + 12);
+            ctx.fillStyle = '#7e22ce';
+            ctx.fillRect(level.portal.x, level.portal.y, level.portal.w, level.portal.h);
+            ctx.strokeStyle = '#d8b4fe';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for(let i=0; i<35; i++) {
+                let angle = i * 0.5 - (time * 1.8);
+                let r = i * 0.65;
+                let px = level.portal.x + 25 + Math.cos(angle) * r;
+                let py = level.portal.y + 40 + Math.sin(angle) * r;
+                if(i===0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        } else {
+            ctx.fillStyle = '#475569';
+            roundRect(level.portal.x, level.portal.y, level.portal.w, level.portal.h, 12);
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(level.portal.x + 8, level.portal.y + 8, level.portal.w - 16, level.portal.h - 10);
+        }
+
+        // Moedas
+        level.coins.forEach(c => {
+            if(!c.collected && !respawning) {
+                let hover = Math.sin(time * 3.5 + c.x) * 4;
+                if(c.locked) {
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.beginPath();
+                    ctx.arc(c.x + 12, c.y + 12 + hover, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#6b7280';
+                    ctx.beginPath();
+                    ctx.arc(c.x + 12, c.y + 12 + hover, 11, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#374151';
+                    ctx.font = "bold 18px Poppins";
+                    ctx.fillText("🔒", c.x + 4, c.y + 20 + hover);
+                } else {
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.beginPath();
+                    ctx.arc(c.x + 12, c.y + 12 + hover, 13, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.beginPath();
+                    ctx.arc(c.x + 12, c.y + 12 + hover, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#fef08a';
+                    ctx.fillRect(c.x + 9, c.y + 6 + hover, 6, 12);
+                }
+            }
+        });
+
+        particles.forEach(p => {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+            ctx.fill();
+        });
+        ctx.globalAlpha = 1.0;
+
+        // Personagem
+        let bounce = player.grounded ? Math.sin(time * 6) * 1.5 : 0;
+        ctx.fillStyle = '#ef4444';
+        roundRect(player.x, player.y + bounce, player.w, player.h, 8);
+        
+        ctx.fillStyle = '#fff';
+        let eyeOffset = player.vx > 0.3 ? 22 : (player.vx < -0.3 ? 6 : 14);
+        ctx.fillRect(player.x + eyeOffset, player.y + 10 + bounce, 8, 10);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(player.x + eyeOffset + (player.vx > 0.3 ? 4 : 0), player.y + 14 + bounce, 4, 6);
+        
+        ctx.fillStyle = '#dc2626';
+        roundRect(player.x + 6, player.y - 6 + bounce, 20, 8, 4);
+        
+        if(player.hasKey) {
+            ctx.fillStyle = '#facc15';
+            ctx.beginPath();
+            ctx.arc(player.x + 26, player.y + 8 + bounce, 6, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#ca8a04';
+            ctx.fillRect(player.x + 24, player.y + 3 + bounce, 4, 10);
+        }
+
+        ctx.restore();
+    }
+
+    function loop() {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    startLevel(0);
+    loop();
+</script>
+
+</body>
+</html>
