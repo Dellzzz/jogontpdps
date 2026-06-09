@@ -37,6 +37,14 @@
             align-items: center;
         }
         
+        /* Container que agrupa viewport + tutorial (para retrato) */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
         #game-viewport { 
             position: relative;
             background: #87CEEB;
@@ -85,11 +93,7 @@
         
         /* Tutorial - aparece apenas na primeira fase */
         #tutorial-container {
-            position: absolute;
-            top: 55px;
-            left: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(8px);
             border-radius: 12px;
             padding: 8px 16px;
@@ -102,6 +106,33 @@
             font-weight: 500;
             color: #fbbf24;
             border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        
+        /* Modo PAISAGEM: tutorial sobreposto dentro do viewport */
+        @media (orientation: landscape) {
+            #tutorial-container {
+                position: absolute;
+                top: 55px;
+                left: 10px;
+                right: 10px;
+            }
+        }
+        
+        /* Modo RETRATO: tutorial acima do canvas (fora do viewport) */
+        @media (orientation: portrait) {
+            .game-container {
+                flex-direction: column;
+            }
+            #tutorial-container {
+                position: relative;
+                margin-bottom: 10px;
+                width: auto;
+                max-width: 95%;
+            }
+            /* Esconde a barra inferior de instruções no retrato */
+            .instructions {
+                display: none !important;
+            }
         }
         
         .tutorial-item {
@@ -365,9 +396,6 @@
                 font-size: 12px;
                 white-space: nowrap;
             }
-            .instructions {
-                display: none;
-            }
         }
         
         /* Modo PAISAGEM */
@@ -476,6 +504,20 @@
                 font-size: 10px;
                 padding: 3px 8px;
             }
+            #tutorial-container {
+                padding: 6px 12px;
+                gap: 15px;
+            }
+            .tutorial-item {
+                gap: 5px;
+            }
+            .tutorial-key {
+                padding: 3px 8px;
+                font-size: 10px;
+            }
+            .tutorial-text {
+                font-size: 10px;
+            }
         }
         
         @media (max-height: 500px) and (orientation: landscape) {
@@ -525,14 +567,8 @@
 </head>
 <body>
     <div class="game-wrapper">
-        <div id="game-viewport">
-            <div id="hud-container">
-                <div class="hud-box" id="hud-level">🗺️ Nível 1</div>
-                <div class="hud-box" id="hud-coins">🪙 0/3</div>
-                <div class="hud-box" id="hud-lives">❤️ 3</div>
-            </div>
-            
-            <!-- Tutorial - aparece apenas na primeira fase -->
+        <div class="game-container">
+            <!-- Tutorial - aparece apenas na primeira fase (fora do viewport no retrato) -->
             <div id="tutorial-container" style="display: none;">
                 <div class="tutorial-item">
                     <span class="tutorial-key desktop">◀  ▶</span>
@@ -552,19 +588,27 @@
                 </div>
             </div>
             
-            <div id="key-status"></div>
-            <div id="toast"></div>
+            <div id="game-viewport">
+                <div id="hud-container">
+                    <div class="hud-box" id="hud-level">🗺️ Nível 1</div>
+                    <div class="hud-box" id="hud-coins">🪙 0/3</div>
+                    <div class="hud-box" id="hud-lives">❤️ 3</div>
+                </div>
+                
+                <div id="key-status"></div>
+                <div id="toast"></div>
 
-            <canvas id="gameCanvas" width="1280" height="720"></canvas>
-            
-            <div id="feedback-ui">
-                <h3 id="question-text">Pergunta?</h3>
-                <div id="options-box"></div>
-            </div>
-            
-            <div id="game-over-panel">
-                <h2>💀 GAME OVER 💀</h2>
-                <button id="restart-game">Jogar Novamente</button>
+                <canvas id="gameCanvas" width="1280" height="720"></canvas>
+                
+                <div id="feedback-ui">
+                    <h3 id="question-text">Pergunta?</h3>
+                    <div id="options-box"></div>
+                </div>
+                
+                <div id="game-over-panel">
+                    <h2>💀 GAME OVER 💀</h2>
+                    <button id="restart-game">Jogar Novamente</button>
+                </div>
             </div>
         </div>
     </div>
@@ -636,10 +680,9 @@
     const btnRight = document.getElementById('btn-right');
     const btnJump = document.getElementById('btn-jump');
 
-    // ========== FÍSICA - GRAVIDADE AUMENTADA EM 20% ==========
-    // Gravidade anterior: 0.13 -> nova: 0.156 (20% maior)
+    // ========== FÍSICA ==========
     const physics = { 
-        grav: 0.156,        // +20% (0.13 * 1.2)
+        grav: 0.156,
         speed: 2.4,
         jump: -12.0,
         maxJumpHold: -6.5,
