@@ -291,50 +291,61 @@
             }
         }
         
-        /* Modo PAISAGEM (largura > altura) - Círculos à esquerda, baixa opacidade */
+        /* Modo PAISAGEM (largura > altura) - Posicionamento específico */
         @media (orientation: landscape) {
             .mobile-controls {
                 position: fixed;
-                bottom: auto;
-                top: 50%;
-                transform: translateY(-50%);
-                left: 15px;
-                right: auto;
-                flex-direction: column;
-                gap: 15px;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                top: auto;
+                transform: none;
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                align-items: flex-end;
                 padding: 0;
                 background: transparent;
+                gap: 0;
+                pointer-events: none;
+            }
+            
+            /* Container para botões de movimento (esquerda/direita) */
+            .movement-buttons {
+                position: absolute;
+                bottom: 15px;
+                left: 15px;
                 display: flex;
+                flex-direction: row;
+                gap: 15px;
+                pointer-events: auto;
             }
             
-            /* Botão esquerda */
-            .mobile-btn.left {
-                width: 55px;
-                height: 55px;
+            /* Botão pular isolado */
+            .jump-button-container {
+                position: absolute;
+                bottom: 30px;
+                right: 30px;
+                pointer-events: auto;
+            }
+            
+            /* Estilo dos botões de movimento */
+            .mobile-btn.left, .mobile-btn.right {
+                width: 70px;
+                height: 70px;
                 border-radius: 50%;
-                font-size: 32px;
+                font-size: 40px;
                 background: rgba(30, 41, 59, 0.35);
                 border: 2px solid rgba(99, 102, 241, 0.5);
                 backdrop-filter: blur(4px);
             }
             
-            /* Botão direita */
-            .mobile-btn.right {
-                width: 55px;
-                height: 55px;
-                border-radius: 50%;
-                font-size: 32px;
-                background: rgba(30, 41, 59, 0.35);
-                border: 2px solid rgba(99, 102, 241, 0.5);
-                backdrop-filter: blur(4px);
-            }
-            
-            /* Botão pular (círculo com O) */
+            /* Botão pular (maior) */
             .mobile-btn.jump {
-                width: 55px;
-                height: 55px;
+                width: 85px;
+                height: 85px;
                 border-radius: 50%;
-                font-size: 28px;
+                font-size: 42px;
                 background: rgba(99, 102, 241, 0.35);
                 border: 2px solid rgba(251, 191, 36, 0.5);
                 backdrop-filter: blur(4px);
@@ -343,10 +354,6 @@
             .mobile-btn:active {
                 background: rgba(99, 102, 241, 0.7);
                 transform: scale(0.92);
-            }
-            
-            .mobile-btn.left:active, .mobile-btn.right:active {
-                background: rgba(99, 102, 241, 0.7);
             }
             
             .hud-box {
@@ -387,14 +394,25 @@
         }
         
         /* Ajuste para telas pequenas no paisagem */
-        @media (max-height: 400px) and (orientation: landscape) {
-            .mobile-btn.left, .mobile-btn.right, .mobile-btn.jump {
-                width: 45px;
-                height: 45px;
-                font-size: 26px;
+        @media (max-height: 450px) and (orientation: landscape) {
+            .mobile-btn.left, .mobile-btn.right {
+                width: 55px;
+                height: 55px;
+                font-size: 32px;
             }
-            .mobile-controls {
+            .mobile-btn.jump {
+                width: 65px;
+                height: 65px;
+                font-size: 34px;
+            }
+            .movement-buttons {
+                bottom: 10px;
+                left: 10px;
                 gap: 10px;
+            }
+            .jump-button-container {
+                bottom: 20px;
+                right: 20px;
             }
         }
     </style>
@@ -429,9 +447,13 @@
     </div>
     
     <div class="mobile-controls">
-        <div class="mobile-btn left" id="btn-left">&lt;</div>
-        <div class="mobile-btn right" id="btn-right">&gt;</div>
-        <div class="mobile-btn jump" id="btn-jump">O</div>
+        <div class="movement-buttons">
+            <div class="mobile-btn left" id="btn-left">&lt;</div>
+            <div class="mobile-btn right" id="btn-right">&gt;</div>
+        </div>
+        <div class="jump-button-container">
+            <div class="mobile-btn jump" id="btn-jump">O</div>
+        </div>
     </div>
 
 <script>
@@ -492,14 +514,14 @@
     const btnRight = document.getElementById('btn-right');
     const btnJump = document.getElementById('btn-jump');
 
-    // ========== FÍSICA - VELOCIDADE AUMENTADA 1.5x ==========
+    // ========== FÍSICA - VALORES REDUZIDOS ==========
     const physics = { 
-        grav: 0.195,        // 0.13 * 1.5
-        speed: 2.4,         // 1.6 * 1.5
-        jump: -18.0,        // -12.0 * 1.5
-        maxJumpHold: -9.75, // -6.5 * 1.5
-        acceleration: 0.42, // 0.28 * 1.5
-        friction: 0.8       // ajustado para manter controle
+        grav: 0.13,         // gravidade reduzida
+        speed: 2.4,         // velocidade mantida
+        jump: -12.0,        // pulo reduzido
+        maxJumpHold: -6.5,  // pulo mantido reduzido
+        acceleration: 0.42,
+        friction: 0.8
     };
     
     const player = { 
@@ -935,7 +957,7 @@
 
     function update() {
         if(!isQuizActive && !respawning && lives > 0) {
-            time += 0.06; // tempo ajustado para manter animações proporcionais
+            time += 0.04;
             
             let targetVx = 0;
             let isLeft = (keys['ArrowLeft'] || keys['KeyA'] || mobileLeft);
@@ -955,7 +977,7 @@
                 player.vy = physics.jump;
                 player.grounded = false;
                 player.jumpHeld = true;
-                player.jumpTimer = 12;
+                player.jumpTimer = 8;
                 spawnParticles(player.x + 16, player.y + player.h, '#e2e8f0', 6);
             }
             
@@ -1029,7 +1051,7 @@
                 let p = particles[i];
                 p.x += p.vx;
                 p.y += p.vy;
-                p.vy += 0.12;
+                p.vy += 0.08;
                 p.life -= p.decay;
                 if(p.life <= 0) particles.splice(i, 1);
             }
@@ -1043,7 +1065,7 @@
                 let targetX = player.x - canvas.width / 2;
                 if(targetX < 0) targetX = 0;
                 if(targetX > level.w - canvas.width) targetX = level.w - canvas.width;
-                camera.x += (targetX - camera.x) * 0.18;
+                camera.x += (targetX - camera.x) * 0.12;
             } else {
                 camera.x = 0;
             }
@@ -1187,7 +1209,7 @@
         // Moedas
         level.coins.forEach(c => {
             if(!c.collected && !respawning) {
-                let hover = Math.sin(time * 5 * 1.5 + c.x) * 4;
+                let hover = Math.sin(time * 3.5 + c.x) * 4;
                 if(c.locked) {
                     ctx.fillStyle = '#9ca3af';
                     ctx.beginPath();
@@ -1225,7 +1247,7 @@
         ctx.globalAlpha = 1.0;
 
         // Personagem
-        let bounce = player.grounded ? Math.sin(time * 9) * 1.5 : 0;
+        let bounce = player.grounded ? Math.sin(time * 6) * 1.5 : 0;
         ctx.fillStyle = '#ef4444';
         roundRect(player.x, player.y + bounce, player.w, player.h, 8);
         
