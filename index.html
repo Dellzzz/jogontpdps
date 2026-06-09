@@ -83,6 +83,70 @@
             white-space: nowrap;
         }
         
+        /* Tutorial - aparece apenas na primeira fase */
+        #tutorial-container {
+            position: absolute;
+            top: 55px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            border-radius: 12px;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            z-index: 10;
+            pointer-events: none;
+            font-size: 12px;
+            font-weight: 500;
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        
+        .tutorial-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tutorial-key {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #6366f1;
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .tutorial-key.mobile {
+            background: rgba(99, 102, 241, 0.7);
+            border-color: #fbbf24;
+        }
+        
+        .tutorial-text {
+            color: #e2e8f0;
+        }
+        
+        @media (max-width: 768px) {
+            .tutorial-key.mobile {
+                display: inline-block;
+            }
+            .tutorial-key.desktop {
+                display: none;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .tutorial-key.mobile {
+                display: none;
+            }
+            .tutorial-key.desktop {
+                display: inline-block;
+            }
+        }
+        
         .hud-warning {
             background: rgba(239, 68, 68, 0.85);
             animation: pulse-warning 0.8s infinite;
@@ -256,7 +320,7 @@
             border-color: #fbbf24;
         }
         
-        /* Modo RETRATO (altura > largura) - Botões lado a lado, pulo separado e maior */
+        /* Modo RETRATO */
         @media (orientation: portrait) {
             .mobile-controls {
                 bottom: 20px;
@@ -269,14 +333,12 @@
                 padding: 15px;
             }
             
-            /* Container dos botões de movimento lado a lado */
             .movement-buttons {
                 display: flex;
                 flex-direction: row;
                 gap: 20px;
             }
             
-            /* Botões de movimento */
             .mobile-btn.left, .mobile-btn.right {
                 width: 100px;
                 height: 100px;
@@ -285,7 +347,6 @@
                 background: rgba(30, 41, 59, 0.9);
             }
             
-            /* Botão pular - MAIOR e separado */
             .mobile-btn.jump {
                 width: 130px;
                 height: 100px;
@@ -309,7 +370,7 @@
             }
         }
         
-        /* Modo PAISAGEM (largura > altura) - Distância das bordas TRIPLICADA */
+        /* Modo PAISAGEM */
         @media (orientation: landscape) {
             .mobile-controls {
                 position: fixed;
@@ -328,7 +389,6 @@
                 pointer-events: none;
             }
             
-            /* Container para botões de movimento - distância TRIPLICADA (30px -> 90px) */
             .movement-buttons {
                 position: absolute;
                 bottom: 90px;
@@ -339,7 +399,6 @@
                 pointer-events: auto;
             }
             
-            /* Botão pular isolado - distância TRIPLICADA (60px -> 180px) */
             .jump-button-container {
                 position: absolute;
                 bottom: 180px;
@@ -347,7 +406,6 @@
                 pointer-events: auto;
             }
             
-            /* Botões de movimento */
             .mobile-btn.left, .mobile-btn.right {
                 width: 105px;
                 height: 105px;
@@ -358,7 +416,6 @@
                 backdrop-filter: blur(4px);
             }
             
-            /* Botão pular */
             .mobile-btn.jump {
                 width: 128px;
                 height: 128px;
@@ -388,7 +445,6 @@
             }
         }
         
-        /* Desktop/tablet maior - sem botões touch visíveis */
         @media (min-width: 1024px) and (min-height: 700px) {
             .mobile-controls {
                 display: none;
@@ -398,7 +454,6 @@
             }
         }
         
-        /* Ajuste para telas muito pequenas no retrato */
         @media (max-width: 480px) and (orientation: portrait) {
             .mobile-controls {
                 gap: 15px;
@@ -423,7 +478,6 @@
             }
         }
         
-        /* Ajuste para telas pequenas no paisagem */
         @media (max-height: 500px) and (orientation: landscape) {
             .movement-buttons {
                 bottom: 50px;
@@ -446,7 +500,6 @@
             }
         }
         
-        /* Ajuste para telas muito pequenas no paisagem */
         @media (max-height: 380px) and (orientation: landscape) {
             .movement-buttons {
                 bottom: 30px;
@@ -478,6 +531,27 @@
                 <div class="hud-box" id="hud-coins">🪙 0/3</div>
                 <div class="hud-box" id="hud-lives">❤️ 3</div>
             </div>
+            
+            <!-- Tutorial - aparece apenas na primeira fase -->
+            <div id="tutorial-container" style="display: none;">
+                <div class="tutorial-item">
+                    <span class="tutorial-key desktop">◀  ▶</span>
+                    <span class="tutorial-key desktop">A  D</span>
+                    <span class="tutorial-key mobile">◀  ▶</span>
+                    <span class="tutorial-text">Mover</span>
+                </div>
+                <div class="tutorial-item">
+                    <span class="tutorial-key desktop">▲</span>
+                    <span class="tutorial-key desktop">ESPACO</span>
+                    <span class="tutorial-key mobile">O</span>
+                    <span class="tutorial-text">Pular (segure para mais alto)</span>
+                </div>
+                <div class="tutorial-item">
+                    <span class="tutorial-key">🪙</span>
+                    <span class="tutorial-text">Colete 3 moedas para abrir o portal</span>
+                </div>
+            </div>
+            
             <div id="key-status"></div>
             <div id="toast"></div>
 
@@ -513,6 +587,7 @@
     const viewport = document.getElementById('game-viewport');
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    const tutorialContainer = document.getElementById('tutorial-container');
     
     function resizeGame() {
         const windowWidth = window.innerWidth;
@@ -561,9 +636,10 @@
     const btnRight = document.getElementById('btn-right');
     const btnJump = document.getElementById('btn-jump');
 
-    // FÍSICA
+    // ========== FÍSICA - GRAVIDADE AUMENTADA EM 20% ==========
+    // Gravidade anterior: 0.13 -> nova: 0.156 (20% maior)
     const physics = { 
-        grav: 0.13,
+        grav: 0.156,        // +20% (0.13 * 1.2)
         speed: 2.4,
         jump: -12.0,
         maxJumpHold: -6.5,
@@ -848,6 +924,13 @@
         totalCoinsInLevel = level.totalCoins;
         camera.x = 0;
         particles = [];
+        
+        // Mostrar tutorial APENAS na primeira fase (nível 0)
+        if (currentLevel === 0) {
+            tutorialContainer.style.display = 'flex';
+        } else {
+            tutorialContainer.style.display = 'none';
+        }
         
         if(level.hasPit) {
             checkpoint = { x: null, y: null, active: false, level: -1, coinsCollected: 0, hasKey: false, collectedCoinsIndices: [] };
