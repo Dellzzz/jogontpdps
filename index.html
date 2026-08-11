@@ -1064,7 +1064,21 @@
         { q: "Em qual frase o verbo está no passado?", opts: ["Eu estudo matemática.", "Nós iremos viajar.", "Ela brincou no parque.", "Eles cantam muito bem."], ans: 2 },
         { q: "Qual é o resultado de 9 × 8?", opts: ["72", "81", "64", "56"], ans: 0 },
         { q: "Um triângulo possui quantos lados?", opts: ["2", "3", "4", "5"], ans: 1 },
-        { q: "Qual é o maior país da América do Sul?", opts: ["Argentina", "Chile", "Brasil", "Peru"], ans: 2 }
+        { q: "Qual é o maior país da América do Sul?", opts: ["Argentina", "Chile", "Brasil", "Peru"], ans: 2 },
+
+        // ---------- NÍVEL BÁSICO — ENSINO FUNDAMENTAL 1 ----------
+        { q: "Quanto é 15 + 28?", opts: ["33", "43", "53", "63"], ans: 1 },
+        { q: "Qual é a metade de 50?", opts: ["15", "20", "25", "30"], ans: 2 },
+        { q: "Qual destes animais é um mamífero?", opts: ["Tubarão", "Golfinho", "Tartaruga", "Sapo"], ans: 1 },
+        { q: "Qual é a capital do Brasil?", opts: ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"], ans: 2 },
+        { q: "Qual parte da planta absorve a água do solo?", opts: ["A folha", "O caule", "A raiz", "A flor"], ans: 2 },
+
+        // ---------- NÍVEL BÁSICO — ENSINO FUNDAMENTAL 2 ----------
+        { q: "Qual é o plural da palavra 'cão'?", opts: ["cãos", "cães", "cãoes", "cans"], ans: 1 },
+        { q: "Qual é o maior planeta do Sistema Solar?", opts: ["Terra", "Júpiter", "Saturno", "Netuno"], ans: 1 },
+        { q: "Em que ano o Brasil declarou sua independência de Portugal?", opts: ["1500", "1808", "1822", "1889"], ans: 2 },
+        { q: "Qual é o maior oceano do planeta?", opts: ["Atlântico", "Índico", "Pacífico", "Ártico"], ans: 2 },
+        { q: "Qual destas palavras é um substantivo?", opts: ["correr", "bonito", "cadeira", "rapidamente"], ans: 2 }
     ];
 
     const levels = [
@@ -1165,6 +1179,7 @@
     // ========== MENU / PAUSE ==========
     function iniciarJogo() {
         lives = CONFIG.vidasIniciais;
+        reiniciarFilaPerguntas();
         gameOverPanel.style.display = 'none';
         ui.style.display = 'none';
         ultimoRespawnX = null;
@@ -1503,19 +1518,47 @@
         }
     }
 
+    // ===================================================================
+    // FILA DE PERGUNTAS
+    // Antes o índice era fixo pela fase (questions[currentLevel]), então
+    // errar uma vez fazia a pergunta seguinte reaparecer na próxima fase.
+    // Agora existe uma fila embaralhada: cada pergunta sai UMA vez por
+    // partida, e a que o aluno errou volta para o fim da fila (revisão).
+    // ===================================================================
+    let filaPerguntas = [];
     let indicePergunta = 0;
     
+    function embaralhar(lista) {
+        for(let i = lista.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [lista[i], lista[j]] = [lista[j], lista[i]];
+        }
+        return lista;
+    }
+    
+    function reiniciarFilaPerguntas() {
+        filaPerguntas = embaralhar(questions.map((_, i) => i));
+    }
+    
+    function proximaPergunta(evitar = -1) {
+        if(filaPerguntas.length === 0) reiniciarFilaPerguntas();
+        
+        let pos = filaPerguntas.findIndex(i => i !== evitar);
+        if(pos === -1) { // só sobrou a que acabou de ser errada
+            reiniciarFilaPerguntas();
+            pos = filaPerguntas.findIndex(i => i !== evitar);
+            if(pos === -1) pos = 0;
+        }
+        return filaPerguntas.splice(pos, 1)[0];
+    }
+    
     function sortearPergunta() {
-        // pergunta padrão da fase; se o aluno errar, troca por outra
-        const q = questions[indicePergunta % questions.length];
+        const q = questions[indicePergunta];
         if(!CONFIG.embaralharAlternativas) {
             return { q: q.q, opts: q.opts.slice(), ans: q.ans };
         }
         const pares = q.opts.map((texto, i) => ({ texto, certa: i === q.ans }));
-        for(let i = pares.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [pares[i], pares[j]] = [pares[j], pares[i]];
-        }
+        embaralhar(pares);
         return {
             q: q.q,
             opts: pares.map(p => p.texto),
@@ -1524,7 +1567,7 @@
     }
 
     function triggerQuiz() {
-        indicePergunta = currentLevel;
+        indicePergunta = proximaPergunta();
         definirEstado('quiz');
         mostrarPergunta();
     }
@@ -1566,12 +1609,14 @@
         btn.className = 'option-btn';
         btn.innerText = CONFIG.reiniciarFaseAoErrar ? "Refazer a fase" : "Responder outra pergunta";
         btn.onclick = () => {
+            const errada = indicePergunta;
+            filaPerguntas.push(errada); // volta para revisão mais tarde
             if(CONFIG.reiniciarFaseAoErrar) {
                 ui.style.display = 'none';
                 startLevel(currentLevel);
                 definirEstado('jogando');
             } else {
-                indicePergunta = (indicePergunta + 1) % questions.length;
+                indicePergunta = proximaPergunta(errada);
                 mostrarPergunta();
             }
         };
